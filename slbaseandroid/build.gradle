@@ -1,10 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 29
-
 
     defaultConfig {
         minSdkVersion 18
@@ -12,10 +12,12 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
     }
-
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -26,11 +28,62 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.2.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    api fileTree(dir: 'libs', include: ['*.jar'])
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.ext.kotlin_version}"
+    api 'androidx.appcompat:appcompat:1.1.0'
+    api 'androidx.core:core-ktx:1.2.0'
+
+    //LiveEventBus
+    api 'com.jeremyliao:live-event-bus-x:1.4.4'
+    // 添加Jetpack中架构组件的依赖，注意viewmodel要添加viewmodel-ktx的依赖
+    api "androidx.lifecycle:lifecycle-livedata:${rootProject.ext.lifecycle_version}"
+    api "androidx.lifecycle:lifecycle-viewmodel-ktx:${rootProject.ext.lifecycle_version}"
+    api "androidx.lifecycle:lifecycle-extensions:${rootProject.ext.lifecycle_version}"
+    //Retrofit+OkHttp+Kotlin协程 网络请求架构
+    api 'com.squareup.okhttp3:okhttp:3.12.0'
+    api 'com.squareup.okhttp3:logging-interceptor:3.12.0'
+    //Retrofit网络请求
+    api 'com.squareup.retrofit2:retrofit:2.8.1' exclude group:'com.squareup.okhttp3'
+    api 'com.squareup.retrofit2:converter-gson:2.8.1' exclude group:'com.squareup.okhttp3'
+    //Kotlin Coroutines 协程
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4"
+    //协程 + room
+    api "androidx.room:room-runtime:2.2.5"
+    kapt "androidx.room:room-compiler:2.2.5"
+    api "androidx.room:room-ktx:2.2.5"
+
+    //动态权限
+    implementation 'com.afollestad:assent:2.3.1'
+
+    // Koin for Android 依赖注入框架(替代dagger2)
+//    api "org.koin:koin-android-viewmodel:${rootProject.ext.koin_version}"
+//    api "org.koin:koin-android:${rootProject.ext.koin_version}"
+//    api "org.koin:koin-android-scope:${rootProject.ext.koin_version}"
+//    api "org.koin:koin-android-ext:${rootProject.ext.koin_version}"
+
+    // Koin AndroidX Scope features
+    api "org.koin:koin-androidx-scope:${rootProject.ext.koin_version}"
+    // Koin AndroidX ViewModel features
+    api "org.koin:koin-androidx-viewmodel:${rootProject.ext.koin_version}"
+    // Koin AndroidX Experimental features
+//    api "org.koin:koin-androidx-ext:${rootProject.ext.koin_version}"
+
+    //下拉刷新
+    api 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0'
+    api 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0'
+
+    //内存泄漏检测工具leakcanary
+    debugApi 'com.squareup.leakcanary:leakcanary-android:1.6.2'
+    releaseApi 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
+
+    //stetho是Facebook开源的一个Android调试工具
+//    api 'com.facebook.stetho:stetho:1.5.1'
+
+    //滑动关闭
+//    api 'com.aitangba:swipeback:1.0.3'
+
+    // Navigation
+    api 'androidx.navigation:navigation-fragment-ktx:2.2.1'
+    api 'androidx.navigation:navigation-ui-ktx:2.2.1'
+    api "androidx.viewpager2:viewpager2:1.0.0"
 }

@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">baseandroid</string>
+
+    <string name="menu_a">首页</string>
+    <string name="menu_b">论坛</string>
+    <string name="menu_c">资讯</string>
+    <string name="menu_d">商城</string>
+    <string name="menu_e">我的</string>
 </resources>

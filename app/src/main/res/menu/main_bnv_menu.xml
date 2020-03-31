@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/main0"
+        android:icon="@drawable/selector_main_icon0"
+        android:title="@string/menu_a" />
+
+    <item
+        android:id="@+id/main1"
+        android:icon="@drawable/main_luntan"
+        android:title="@string/menu_b" />
+
+    <item
+        android:id="@+id/main2"
+        android:icon="@drawable/main_zixun"
+        android:title="@string/menu_c" />
+
+    <item
+        android:id="@+id/main3"
+        android:icon="@drawable/main_zysc"
+        android:title="@string/menu_d" />
+    <item
+        android:id="@+id/main4"
+        android:icon="@drawable/main_person"
+        android:title="@string/menu_e" />
+</menu>
