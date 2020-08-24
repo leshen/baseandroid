@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual.snap;
+package baseandroid.sl.sdk.analytics.visual.snap;
 
 import android.content.Context;
 import android.util.SparseArray;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 /**
  * SDK内部接口
@@ -33,7 +34,7 @@ import java.util.Map;
 public abstract class ResourceReader implements ResourceIds {
 
     @SuppressWarnings("unused")
-    private static final String TAG = "SA.ResourceReader";
+    private static final String TAG = "Sl.ResourceReader";
     private final Context mContext;
     private final Map<String, Integer> mIdNameToId;
     private final SparseArray<String> mIdToIdName;
@@ -67,7 +68,7 @@ public abstract class ResourceReader implements ResourceIds {
                 }
             }
         } catch (IllegalAccessException e) {
-            SALog.i(TAG, "Can't read built-in id names from " + platformIdClass.getName(), e);
+            SlLog.i(TAG, "Can't read built-in id names from " + platformIdClass.getName(), e);
         }
     }
 
@@ -102,9 +103,9 @@ public abstract class ResourceReader implements ResourceIds {
             final Class<?> rIdClass = Class.forName(localClassName);
             readClassIds(rIdClass, null, mIdNameToId);
         } catch (ClassNotFoundException e) {
-            SALog.i(TAG, "Can't load names for Android view ids from '" + localClassName
+            SlLog.i(TAG, "Can't load names for Android view ids from '" + localClassName
                     + "', ids by name will not be available in the events editor.");
-            SALog.i(TAG,
+            SlLog.i(TAG,
                     "You may be missing a Resources class for your package due to your proguard configuration, "
                             + "or you may be using an applicationId in your build that isn't the same as the "
                             + "package declared in your AndroidManifest.xml file.\n"
@@ -117,9 +118,9 @@ public abstract class ResourceReader implements ResourceIds {
                             + ""
                             + "If you're not using proguard, or if your proguard configuration already contains"
                             + " the directive above, you can add the following to your AndroidManifest.xml file"
-                            + " to explicitly point the SensorsData library to the appropriate library for your"
+                            + " to explicitly point the SlData library to the appropriate library for your"
                             + " resources class:\n\n"
-                            + "<meta-data android:name=\"com.sensorsdata.analytics.android.ResourcePackageName\""
+                            + "<meta-data android:name=\"com.Sldata.analytics.android.ResourcePackageName\""
                             + " android:value=\"YOUR_PACKAGE_NAME\" />\n\n"
                             + "where YOUR_PACKAGE_NAME is the same string you use for the \"package\" attribute"
                             + " in your <manifest> tag.");

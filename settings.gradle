@@ -1,3 +1,5 @@
-rootProject.name='baseandroid'
+include ':sdk'
+include ':plugin'
+rootProject.name='baseLib'
 include ':app'
 include ':slbaseandroid'

@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import org.json.JSONObject;
 
-public class SensorsDataSDKRemoteConfig {
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
+public class SlDataSDKRemoteConfig {
     static final int REMOTE_EVENT_TYPE_NO_USE = -1;
     /**
      * config 版本号
@@ -37,9 +39,20 @@ public class SensorsDataSDKRemoteConfig {
      * 是否关闭 SDK
      */
     private boolean disableSDK;
+
+    /**
+     * RSA 公钥
+     */
+    private String rsaPublicKey;
+
+    /**
+     * 公钥版本名称
+     */
+    private int pkv;
+
     private int mAutoTrackEventType;
 
-    public SensorsDataSDKRemoteConfig() {
+    public SlDataSDKRemoteConfig() {
         this.disableDebugMode = false;
         this.disableSDK = false;
         this.autoTrackMode = REMOTE_EVENT_TYPE_NO_USE;
@@ -69,6 +82,23 @@ public class SensorsDataSDKRemoteConfig {
         this.disableSDK = disableSDK;
     }
 
+    public String getRsaPublicKey() {
+        return rsaPublicKey;
+    }
+
+    public void setRsaPublicKey(String rsaPublicKey) {
+        this.rsaPublicKey = rsaPublicKey;
+    }
+
+    public int getPkv() {
+        return pkv;
+    }
+
+    public void setPkv(int pkv) {
+        this.pkv = pkv;
+    }
+
+
     int getAutoTrackMode() {
         return autoTrackMode;
     }
@@ -81,20 +111,20 @@ public class SensorsDataSDKRemoteConfig {
             return;
         }
 
-        if ((this.autoTrackMode & SensorsAnalyticsAutoTrackEventType.APP_START) == SensorsAnalyticsAutoTrackEventType.APP_START) {
-            this.mAutoTrackEventType |= SensorsAnalyticsAutoTrackEventType.APP_START;
+        if ((this.autoTrackMode & SlAnalyticsAutoTrackEventType.APP_START) == SlAnalyticsAutoTrackEventType.APP_START) {
+            this.mAutoTrackEventType |= SlAnalyticsAutoTrackEventType.APP_START;
         }
 
-        if ((this.autoTrackMode & SensorsAnalyticsAutoTrackEventType.APP_END) == SensorsAnalyticsAutoTrackEventType.APP_END) {
-            this.mAutoTrackEventType |= SensorsAnalyticsAutoTrackEventType.APP_END;
+        if ((this.autoTrackMode & SlAnalyticsAutoTrackEventType.APP_END) == SlAnalyticsAutoTrackEventType.APP_END) {
+            this.mAutoTrackEventType |= SlAnalyticsAutoTrackEventType.APP_END;
         }
 
-        if ((this.autoTrackMode & SensorsAnalyticsAutoTrackEventType.APP_CLICK) == SensorsAnalyticsAutoTrackEventType.APP_CLICK) {
-            this.mAutoTrackEventType |= SensorsAnalyticsAutoTrackEventType.APP_CLICK;
+        if ((this.autoTrackMode & SlAnalyticsAutoTrackEventType.APP_CLICK) == SlAnalyticsAutoTrackEventType.APP_CLICK) {
+            this.mAutoTrackEventType |= SlAnalyticsAutoTrackEventType.APP_CLICK;
         }
 
-        if ((this.autoTrackMode & SensorsAnalyticsAutoTrackEventType.APP_VIEW_SCREEN) == SensorsAnalyticsAutoTrackEventType.APP_VIEW_SCREEN) {
-            this.mAutoTrackEventType |= SensorsAnalyticsAutoTrackEventType.APP_VIEW_SCREEN;
+        if ((this.autoTrackMode & SlAnalyticsAutoTrackEventType.APP_VIEW_SCREEN) == SlAnalyticsAutoTrackEventType.APP_VIEW_SCREEN) {
+            this.mAutoTrackEventType |= SlAnalyticsAutoTrackEventType.APP_VIEW_SCREEN;
         }
     }
 
@@ -124,7 +154,7 @@ public class SensorsDataSDKRemoteConfig {
             configObject.put("disableSDK", disableSDK);
             jsonObject.put("configs", configObject);
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return jsonObject;
     }
@@ -134,3 +164,4 @@ public class SensorsDataSDKRemoteConfig {
         return "{ v=" + v + ", disableDebugMode=" + disableDebugMode + ", disableSDK=" + disableSDK + ", autoTrackMode=" + autoTrackMode + "}";
     }
 }
+

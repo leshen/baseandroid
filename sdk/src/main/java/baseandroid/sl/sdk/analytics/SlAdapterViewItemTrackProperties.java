@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2016/11/30.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +23,7 @@ import org.json.JSONObject;
 /**
  * 获取 ListView、GridView position 位置 Item 的 properties
  */
-public interface SensorsAdapterViewItemTrackProperties {
+public interface SlAdapterViewItemTrackProperties {
     /**
      * 点击 position 处 item 的扩展属性
      *
@@ -31,5 +31,5 @@ public interface SensorsAdapterViewItemTrackProperties {
      * @return JSONObject
      * @throws JSONException JSON 异常
      */
-    JSONObject getSensorsItemTrackProperties(int position) throws JSONException;
+    JSONObject getSlItemTrackProperties(int position) throws JSONException;
 }

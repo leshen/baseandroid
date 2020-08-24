@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 
 public class TrackTaskManagerThread implements Runnable {
@@ -42,7 +44,7 @@ public class TrackTaskManagerThread implements Runnable {
             this.mTrackTaskManager = TrackTaskManager.getInstance();
             mPool = Executors.newFixedThreadPool(POOL_SIZE);
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -62,7 +64,7 @@ public class TrackTaskManagerThread implements Runnable {
             }
             mPool.shutdown();
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 

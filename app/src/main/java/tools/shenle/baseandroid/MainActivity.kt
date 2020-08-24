@@ -1,6 +1,7 @@
 package tools.shenle.baseandroid
 
 import org.koin.androidx.viewmodel.ext.android.getViewModel
+import tools.shenle.baseandroid.R
 import tools.shenle.slbaseandroid.baseall.BaseViewModelActivity
 import tools.shenle.slbaseandroid.tool.UIUtils
 

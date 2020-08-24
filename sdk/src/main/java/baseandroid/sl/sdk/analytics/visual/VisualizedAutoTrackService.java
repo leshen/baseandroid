@@ -1,6 +1,6 @@
 /*
  * Created by renqingyou on 2019/04/13.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual;
+package baseandroid.sl.sdk.analytics.visual;
 
 import android.app.Activity;
 import android.content.pm.ApplicationInfo;
@@ -23,7 +23,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
 
 /**
  * Created by 任庆友 on 2019/04/13
@@ -49,7 +50,7 @@ public class VisualizedAutoTrackService {
                 mVTrack.stopUpdates(false);
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -59,7 +60,7 @@ public class VisualizedAutoTrackService {
                 mVTrack.startUpdates();
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -74,7 +75,7 @@ public class VisualizedAutoTrackService {
             }
             if (Build.VERSION.SDK_INT >= 16) {
                 String resourcePackageName =
-                        configBundle.getString("com.sensorsdata.analytics.android.ResourcePackageName");
+                        configBundle.getString("com.Sldata.analytics.android.ResourcePackageName");
                 if (null == resourcePackageName) {
                     resourcePackageName = activity.getPackageName();
                 }
@@ -83,7 +84,7 @@ public class VisualizedAutoTrackService {
                 mVTrack.startUpdates();
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 

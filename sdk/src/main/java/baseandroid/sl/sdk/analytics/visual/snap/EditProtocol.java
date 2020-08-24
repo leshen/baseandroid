@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual.snap;
+package baseandroid.sl.sdk.analytics.visual.snap;
 
-import com.sensorsdata.analytics.android.sdk.visual.ViewSnapshot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,10 +25,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import baseandroid.sl.sdk.analytics.visual.ViewSnapshot;
+
 public class EditProtocol {
 
     private static final Class<?>[] NO_PARAMS = new Class[0];
-    private static final String TAG = "SA.EProtocol";
+    private static final String TAG = "Sl.EProtocol";
     private final ResourceIds mResourceIds;
 
     public EditProtocol(ResourceIds resourceIds) {

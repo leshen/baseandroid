@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import java.util.concurrent.LinkedBlockingQueue;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 public class TrackTaskManager {
     private static TrackTaskManager trackTaskManager;
@@ -36,7 +38,7 @@ public class TrackTaskManager {
                 trackTaskManager = new TrackTaskManager();
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return trackTaskManager;
     }
@@ -45,7 +47,7 @@ public class TrackTaskManager {
         try {
             mTrackEventTasks.put(trackEvenTask);
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -53,7 +55,7 @@ public class TrackTaskManager {
         try {
             return mTrackEventTasks.take();
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return null;
     }
@@ -62,7 +64,7 @@ public class TrackTaskManager {
         try {
             return mTrackEventTasks.poll();
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return null;
     }

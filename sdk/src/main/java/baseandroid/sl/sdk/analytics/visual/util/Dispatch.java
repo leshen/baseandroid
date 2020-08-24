@@ -1,4 +1,4 @@
-package com.sensorsdata.analytics.android.sdk.visual.util;
+package baseandroid.sl.sdk.analytics.visual.util;
 
 import android.os.Handler;
 import android.os.HandlerThread;

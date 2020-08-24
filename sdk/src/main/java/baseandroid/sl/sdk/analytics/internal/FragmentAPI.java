@@ -32,7 +32,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import baseandroid.sl.sdk.analytics.SlDataIgnoreTrackAppViewScreen;
 import baseandroid.sl.sdk.analytics.SlDataIgnoreTrackAppViewScreenAndAppClick;
-import baseandroid.sl.sdk.util.SlLog;
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 public class FragmentAPI implements IFragmentAPI {
     private static final String TAG = "FragmentAPI";

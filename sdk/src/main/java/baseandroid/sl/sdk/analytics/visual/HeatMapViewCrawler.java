@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual;
+package baseandroid.sl.sdk.analytics.visual;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -31,14 +31,6 @@ import android.os.Message;
 import android.os.Process;
 import android.text.TextUtils;
 
-import com.sensorsdata.analytics.android.sdk.visual.snap.ResourceIds;
-import com.sensorsdata.analytics.android.sdk.visual.snap.ResourceReader;
-import com.sensorsdata.analytics.android.sdk.SALog;
-import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
-import com.sensorsdata.analytics.android.sdk.util.Base64Coder;
-import com.sensorsdata.analytics.android.sdk.visual.model.SnapInfo;
-import com.sensorsdata.analytics.android.sdk.visual.snap.EditProtocol;
-import com.sensorsdata.analytics.android.sdk.visual.snap.EditState;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,14 +49,23 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import static com.sensorsdata.analytics.android.sdk.util.Base64Coder.CHARSET_UTF8;
+import baseandroid.sl.sdk.analytics.SlDataAPI;
+import baseandroid.sl.sdk.analytics.visual.model.SnapInfo;
+import baseandroid.sl.sdk.analytics.visual.snap.EditProtocol;
+import baseandroid.sl.sdk.analytics.visual.snap.EditState;
+import baseandroid.sl.sdk.analytics.visual.snap.ResourceIds;
+import baseandroid.sl.sdk.analytics.visual.snap.ResourceReader;
+import baseandroid.sl.sdk.analytics.util.Base64Coder;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
+import static baseandroid.sl.sdk.analytics.util.Base64Coder.CHARSET_UTF8;
 
 
 @TargetApi(16)
 class HeatMapViewCrawler implements VTrack {
 
     private static final int MESSAGE_SEND_STATE_FOR_EDITING = 1;
-    private static final String TAG = "SA.HeatMapViewCrawler";
+    private static final String TAG = "Sl.HeatMapViewCrawler";
     private final Activity mActivity;
     private final LifecycleCallbacks mLifecycleCallbacks;
     private final EditState mEditState;
@@ -84,7 +85,7 @@ class HeatMapViewCrawler implements VTrack {
             mPostUrl = URLDecoder.decode(postUrl, CHARSET_UTF8);
             mMessageObject = new JSONObject("{\"type\":\"snapshot_request\",\"payload\":{\"config\":{\"classes\":[{\"name\":\"android.view.View\",\"properties\":[{\"name\":\"importantForAccessibility\",\"get\":{\"selector\":\"isImportantForAccessibility\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}},{\"name\":\"clickable\",\"get\":{\"selector\":\"isClickable\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}}]},{\"name\":\"android.widget.TextView\",\"properties\":[{\"name\":\"importantForAccessibility\",\"get\":{\"selector\":\"isImportantForAccessibility\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}},{\"name\":\"clickable\",\"get\":{\"selector\":\"isClickable\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}}]},{\"name\":\"android.widget.ImageView\",\"properties\":[{\"name\":\"importantForAccessibility\",\"get\":{\"selector\":\"isImportantForAccessibility\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}},{\"name\":\"clickable\",\"get\":{\"selector\":\"isClickable\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}}]}]}}}");
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
             mMessageObject = null;
         }
         final Application app = (Application) mActivity.getApplicationContext();
@@ -117,7 +118,7 @@ class HeatMapViewCrawler implements VTrack {
                         .sendMessage(mMessageThreadHandler.obtainMessage(MESSAGE_SEND_STATE_FOR_EDITING));
             }
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -131,7 +132,7 @@ class HeatMapViewCrawler implements VTrack {
             final Application app = (Application) mActivity.getApplicationContext();
             app.unregisterActivityLifecycleCallbacks(mLifecycleCallbacks);
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -219,14 +220,14 @@ class HeatMapViewCrawler implements VTrack {
                     mSnapshot = mProtocol.readSnapshotConfig(payload);
                 }
                 if (null == mSnapshot) {
-                    SALog.i(TAG, "Snapshot should be initialize at first calling.");
+                    SlLog.i(TAG, "Snapshot should be initialize at first calling.");
                     return;
                 }
             } catch (final JSONException e) {
-                SALog.i(TAG, "Payload with snapshot config required with snapshot request", e);
+                SlLog.i(TAG, "Payload with snapshot config required with snapshot request", e);
                 return;
             } catch (final EditProtocol.BadInstructionsException e) {
-                SALog.i(TAG, "VTrack server sent malformed message with snapshot request", e);
+                SlLog.i(TAG, "VTrack server sent malformed message with snapshot request", e);
                 return;
             }
 
@@ -285,12 +286,12 @@ class HeatMapViewCrawler implements VTrack {
                 writer.write("}");
                 writer.flush();
             } catch (final IOException e) {
-                SALog.i(TAG, "Can't write snapshot request to server", e);
+                SlLog.i(TAG, "Can't write snapshot request to server", e);
             } finally {
                 try {
                     writer.close();
                 } catch (final IOException e) {
-                    SALog.i(TAG, "Can't close writer.", e);
+                    SlLog.i(TAG, "Can't close writer.", e);
                 }
             }
 
@@ -310,8 +311,8 @@ class HeatMapViewCrawler implements VTrack {
                 HttpURLConnection connection;
                 final URL url = new URL(mPostUrl);
                 connection = (HttpURLConnection) url.openConnection();
-                if (SensorsDataAPI.sharedInstance().getSSLSocketFactory() != null && connection instanceof HttpsURLConnection) {
-                    ((HttpsURLConnection) connection).setSSLSocketFactory(SensorsDataAPI.sharedInstance().getSSLSocketFactory());
+                if (SlDataAPI.sharedInstance().getSSLSocketFactory() != null && connection instanceof HttpsURLConnection) {
+                    ((HttpsURLConnection) connection).setSSLSocketFactory(SlDataAPI.sharedInstance().getSSLSocketFactory());
                 }
                 connection.setDoOutput(true);
                 connection.setRequestMethod("POST");
@@ -332,8 +333,8 @@ class HeatMapViewCrawler implements VTrack {
                 byte[] responseBody = slurp(in);
 
                 String response = new String(responseBody, CHARSET_UTF8);
-                SALog.i(TAG, "responseCode=" + responseCode);
-                SALog.i(TAG, "response=" + response);
+                SlLog.i(TAG, "responseCode=" + responseCode);
+                SlLog.i(TAG, "response=" + response);
                 JSONObject responseJson = new JSONObject(response);
                 if (responseCode == 200) {
                     int delay = responseJson.getInt("delay");
@@ -342,13 +343,13 @@ class HeatMapViewCrawler implements VTrack {
                     }
                 }
             } catch (Exception e) {
-                SALog.printStackTrace(e);
+                SlLog.printStackTrace(e);
             } finally {
                 if (in != null) {
                     try {
                         in.close();
                     } catch (Exception ex) {
-                        SALog.printStackTrace(ex);
+                        SlLog.printStackTrace(ex);
                     }
                 }
 
@@ -356,7 +357,7 @@ class HeatMapViewCrawler implements VTrack {
                     try {
                         out2.close();
                     } catch (Exception ex) {
-                        SALog.printStackTrace(ex);
+                        SlLog.printStackTrace(ex);
                     }
                 }
 
@@ -364,7 +365,7 @@ class HeatMapViewCrawler implements VTrack {
                     try {
                         bout.close();
                     } catch (Exception ex) {
-                        SALog.printStackTrace(ex);
+                        SlLog.printStackTrace(ex);
                     }
                 }
             }

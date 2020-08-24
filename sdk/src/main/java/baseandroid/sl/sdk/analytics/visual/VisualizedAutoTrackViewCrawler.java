@@ -1,6 +1,6 @@
 /*
  * Created by renqingyou on 2019/04/13.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual;
+package baseandroid.sl.sdk.analytics.visual;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -31,16 +31,6 @@ import android.os.Message;
 import android.os.Process;
 import android.text.TextUtils;
 
-import com.sensorsdata.analytics.android.sdk.BuildConfig;
-import com.sensorsdata.analytics.android.sdk.visual.snap.ResourceIds;
-import com.sensorsdata.analytics.android.sdk.visual.snap.ResourceReader;
-import com.sensorsdata.analytics.android.sdk.SALog;
-import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
-import com.sensorsdata.analytics.android.sdk.util.Base64Coder;
-import com.sensorsdata.analytics.android.sdk.visual.model.SnapInfo;
-import com.sensorsdata.analytics.android.sdk.visual.model.WebNodeInfo;
-import com.sensorsdata.analytics.android.sdk.visual.snap.EditProtocol;
-import com.sensorsdata.analytics.android.sdk.visual.snap.EditState;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,14 +50,25 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import static com.sensorsdata.analytics.android.sdk.util.Base64Coder.CHARSET_UTF8;
+import baseandroid.sl.sdk.analytics.AppStateManager;
+import baseandroid.sl.sdk.analytics.BuildConfig;
+import baseandroid.sl.sdk.analytics.SlDataAPI;
+import baseandroid.sl.sdk.analytics.visual.model.SnapInfo;
+import baseandroid.sl.sdk.analytics.visual.model.WebNodeInfo;
+import baseandroid.sl.sdk.analytics.visual.snap.EditProtocol;
+import baseandroid.sl.sdk.analytics.visual.snap.EditState;
+import baseandroid.sl.sdk.analytics.visual.snap.ResourceIds;
+import baseandroid.sl.sdk.analytics.visual.snap.ResourceReader;
+import baseandroid.sl.sdk.analytics.util.Base64Coder;
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
+import static baseandroid.sl.sdk.analytics.util.Base64Coder.CHARSET_UTF8;
 
 @TargetApi(16)
 class VisualizedAutoTrackViewCrawler implements VTrack {
 
     private static final int MESSAGE_SEND_STATE_FOR_EDITING = 1;
-    private static final String TAG = "SA.VisualizedAutoTrackViewCrawler";
+    private static final String TAG = "Sl.VisualizedAutoTrackViewCrawler";
     private final Activity mActivity;
     private final LifecycleCallbacks mLifecycleCallbacks;
     private final EditState mEditState;
@@ -88,7 +89,7 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
             mPostUrl = URLDecoder.decode(postUrl, CHARSET_UTF8);
             mMessageObject = new JSONObject("{\"type\":\"snapshot_request\",\"payload\":{\"config\":{\"classes\":[{\"name\":\"android.view.View\",\"properties\":[{\"name\":\"importantForAccessibility\",\"get\":{\"selector\":\"isImportantForAccessibility\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}},{\"name\":\"clickable\",\"get\":{\"selector\":\"isClickable\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}}]},{\"name\":\"android.widget.TextView\",\"properties\":[{\"name\":\"importantForAccessibility\",\"get\":{\"selector\":\"isImportantForAccessibility\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}},{\"name\":\"clickable\",\"get\":{\"selector\":\"isClickable\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}}]},{\"name\":\"android.widget.ImageView\",\"properties\":[{\"name\":\"importantForAccessibility\",\"get\":{\"selector\":\"isImportantForAccessibility\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}},{\"name\":\"clickable\",\"get\":{\"selector\":\"isClickable\",\"parameters\":[],\"result\":{\"type\":\"java.lang.Boolean\"}}}]}]}}}");
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
             mMessageObject = null;
         }
         final Application app = (Application) mActivity.getApplicationContext();
@@ -121,7 +122,7 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
                 mVisualizedAutoTrackRunning = true;
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -136,7 +137,7 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
             app.unregisterActivityLifecycleCallbacks(mLifecycleCallbacks);
             mVisualizedAutoTrackRunning = false;
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -223,14 +224,14 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
                 }
 
                 if (null == mSnapshot) {
-                    SALog.i(TAG, "Snapshot should be initialize at first calling.");
+                    SlLog.i(TAG, "Snapshot should be initialize at first calling.");
                     return;
                 }
             } catch (final JSONException e) {
-                SALog.i(TAG, "Payload with snapshot config required with snapshot request", e);
+                SlLog.i(TAG, "Payload with snapshot config required with snapshot request", e);
                 return;
             } catch (final EditProtocol.BadInstructionsException e) {
-                SALog.i(TAG, "VisualizedAutoTrack server sent malformed message with snapshot request", e);
+                SlLog.i(TAG, "VisualizedAutoTrack server sent malformed message with snapshot request", e);
                 return;
             }
 
@@ -284,8 +285,24 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
 
                     writer.write("}");
                 }
+
+                String pageName = null;
                 if (!TextUtils.isEmpty(info.screenName)) {
                     writer.write(",\"screen_name\": \"" + info.screenName + "\"");
+                    pageName = info.screenName;
+                }
+
+                // 页面浏览事件中，如果存在 fragment ，则优先取 fragment screenName
+                if (info.hasFragment) {
+                    String fragmentScreenName = AppStateManager.getInstance().getFragmentScreenName();
+                    if (!TextUtils.isEmpty(fragmentScreenName)) {
+                        pageName = fragmentScreenName;
+                    }
+                }
+
+                SlLog.i(TAG, "page_name： " + pageName);
+                if (!TextUtils.isEmpty(pageName)) {
+                    writer.write(",\"page_name\": \"" + pageName + "\"");
                 }
 
                 if (!TextUtils.isEmpty(info.activityTitle)) {
@@ -337,12 +354,12 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
                 writer.write("}");
                 writer.flush();
             } catch (final IOException e) {
-                SALog.i(TAG, "Can't write snapshot request to server", e);
+                SlLog.i(TAG, "Can't write snapshot request to server", e);
             } finally {
                 try {
                     writer.close();
                 } catch (final IOException e) {
-                    SALog.i(TAG, "Can't close writer.", e);
+                    SlLog.i(TAG, "Can't close writer.", e);
                 }
             }
             onSnapFinished(info);
@@ -368,8 +385,8 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
                 HttpURLConnection connection;
                 final URL url = new URL(mPostUrl);
                 connection = (HttpURLConnection) url.openConnection();
-                if (SensorsDataAPI.sharedInstance().getSSLSocketFactory() != null && connection instanceof HttpsURLConnection) {
-                    ((HttpsURLConnection) connection).setSSLSocketFactory(SensorsDataAPI.sharedInstance().getSSLSocketFactory());
+                if (SlDataAPI.sharedInstance().getSSLSocketFactory() != null && connection instanceof HttpsURLConnection) {
+                    ((HttpsURLConnection) connection).setSSLSocketFactory(SlDataAPI.sharedInstance().getSSLSocketFactory());
                 }
                 connection.setDoOutput(true);
                 connection.setRequestMethod("POST");
@@ -393,8 +410,8 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
                 out2.close();
 
                 String response = new String(responseBody, CHARSET_UTF8);
-                SALog.i(TAG, "responseCode=" + responseCode);
-                SALog.i(TAG, "response=" + response);
+                SlLog.i(TAG, "responseCode=" + responseCode);
+                SlLog.i(TAG, "response=" + response);
                 JSONObject responseJson = new JSONObject(response);
                 if (responseCode == 200) {
                     int delay = responseJson.getInt("delay");
@@ -403,7 +420,7 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
                     }
                 }
             } catch (Exception e) {
-                SALog.printStackTrace(e);
+                SlLog.printStackTrace(e);
             }
 
             if (rePostSnapshot) {
@@ -429,3 +446,4 @@ class VisualizedAutoTrackViewCrawler implements VTrack {
         }
     }
 }
+

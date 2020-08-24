@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.data.persistent;
+package baseandroid.sl.sdk.analytics.data.persistent;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.sensorsdata.analytics.android.sdk.data.PersistentLoader;
-import com.sensorsdata.analytics.android.sdk.util.SensorsDataUtils;
 
 import java.util.UUID;
 import java.util.concurrent.Future;
+
+import baseandroid.sl.sdk.analytics.data.PersistentLoader;
+import baseandroid.sl.sdk.analytics.util.SlDataUtils;
 
 public class PersistentDistinctId extends PersistentIdentity<String> {
     public PersistentDistinctId(Future<SharedPreferences> loadStoredPreferences, final Context context) {
@@ -41,8 +42,8 @@ public class PersistentDistinctId extends PersistentIdentity<String> {
 
             @Override
             public String create() {
-                String androidId = SensorsDataUtils.getAndroidID(context);
-                if (SensorsDataUtils.isValidAndroidId(androidId)) {
+                String androidId = SlDataUtils.getAndroidID(context);
+                if (SlDataUtils.isValidAndroidId(androidId)) {
                     return androidId;
                 }
                 return UUID.randomUUID().toString();

@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
-public class SensorsDataGPSLocation {
+public class SlDataGPSLocation {
     /**
      * 纬度
      */

@@ -1,6 +1,6 @@
 /*
  * Created by zhangxiangwei on 2019/12/31.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,12 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual;
+package baseandroid.sl.sdk.analytics.visual;
 
 import android.annotation.SuppressLint;
 import android.text.TextUtils;
 import android.util.LruCache;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
-import com.sensorsdata.analytics.android.sdk.visual.model.WebNode;
-import com.sensorsdata.analytics.android.sdk.visual.model.WebNodeInfo;
-import com.sensorsdata.analytics.android.sdk.visual.util.Dispatch;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,10 +32,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import baseandroid.sl.sdk.analytics.visual.model.WebNode;
+import baseandroid.sl.sdk.analytics.visual.model.WebNodeInfo;
+import baseandroid.sl.sdk.analytics.visual.util.Dispatch;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
 
 public class WebNodesManager {
 
-    private static final String TAG = "SA.Visual.WebNodesManager";
+    private static final String TAG = "Sl.Visual.WebNodesManager";
     private static final String CALL_TYPE_VISUALIZED_TRACK = "visualized_track";
     private static final String CALL_TYPE_PAGE_INFO = "page_info";
 
@@ -77,7 +78,7 @@ public class WebNodesManager {
         if (TextUtils.isEmpty(message)) {
             return;
         }
-        SALog.i(TAG, "handlerMessage: " + message);
+        SlLog.i(TAG, "handlerMessage: " + message);
         mLastWebNodeMsg = message;
         mHasH5AlertInfo = false;
         try {
@@ -109,9 +110,9 @@ public class WebNodesManager {
                     break;
             }
         } catch (JSONException e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -124,7 +125,7 @@ public class WebNodesManager {
         if (TextUtils.isEmpty(message)) {
             return;
         }
-        SALog.i(TAG, "handlerFailure url " + webViewUrl + ",msg: " + message);
+        SlLog.i(TAG, "handlerFailure url " + webViewUrl + ",msg: " + message);
         mHasH5AlertInfo = true;
         mLastWebNodeMsg = message;
         List<WebNodeInfo.AlertInfo> list = parseAlertResult(message);
@@ -186,9 +187,9 @@ public class WebNodesManager {
                 modifyWebNodes(list, hashMap);
             }
         } catch (JSONException e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return list;
     }
@@ -228,9 +229,9 @@ public class WebNodesManager {
                 }
             }
         } catch (JSONException e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return list;
     }

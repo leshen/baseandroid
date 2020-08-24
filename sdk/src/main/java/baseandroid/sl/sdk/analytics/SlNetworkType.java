@@ -1,6 +1,6 @@
 /*
  * Created by dengshiwei on 2019/06/03.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 /**
  * 网络类型
  */
-public interface SensorsNetworkType {
+public interface SlNetworkType {
     // NULL
     int TYPE_NONE = 0;
     // 2G

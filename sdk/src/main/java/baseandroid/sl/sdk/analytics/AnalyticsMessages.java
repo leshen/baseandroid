@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import android.content.Context;
 import android.net.Uri;
@@ -27,15 +27,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import com.sensorsdata.analytics.android.sdk.data.DbAdapter;
-import com.sensorsdata.analytics.android.sdk.data.DbParams;
-import com.sensorsdata.analytics.android.sdk.exceptions.ConnectErrorException;
-import com.sensorsdata.analytics.android.sdk.exceptions.DebugModeException;
-import com.sensorsdata.analytics.android.sdk.exceptions.InvalidDataException;
-import com.sensorsdata.analytics.android.sdk.exceptions.ResponseErrorException;
-import com.sensorsdata.analytics.android.sdk.util.Base64Coder;
-import com.sensorsdata.analytics.android.sdk.util.JSONUtils;
-import com.sensorsdata.analytics.android.sdk.util.NetworkUtils;
 
 import org.json.JSONObject;
 
@@ -54,16 +45,27 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import static com.sensorsdata.analytics.android.sdk.util.Base64Coder.CHARSET_UTF8;
+import baseandroid.sl.sdk.analytics.data.DbAdapter;
+import baseandroid.sl.sdk.analytics.data.DbParams;
+import baseandroid.sl.sdk.analytics.exceptions.ConnectErrorException;
+import baseandroid.sl.sdk.analytics.exceptions.DebugModeException;
+import baseandroid.sl.sdk.analytics.exceptions.InvalidDataException;
+import baseandroid.sl.sdk.analytics.exceptions.ResponseErrorException;
+import baseandroid.sl.sdk.analytics.util.Base64Coder;
+import baseandroid.sl.sdk.analytics.util.JSONUtils;
+import baseandroid.sl.sdk.analytics.util.NetworkUtils;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
+import static baseandroid.sl.sdk.analytics.util.Base64Coder.CHARSET_UTF8;
 
 
 /**
- * Manage communication of events with the internal database and the SensorsData servers.
+ * Manage communication of events with the internal database and the SlData servers.
  * This class straddles the thread boundary between user threads and
- * a logical SensorsData thread.
+ * a logical SlData thread.
  */
 class AnalyticsMessages {
-    private static final String TAG = "SA.AnalyticsMessages";
+    private static final String TAG = "Sl.AnalyticsMessages";
     private static final int FLUSH_QUEUE = 3;
     private static final int DELETE_ALL = 4;
     private static final Map<Context, AnalyticsMessages> S_INSTANCES = new HashMap<>();
@@ -120,32 +122,32 @@ class AnalyticsMessages {
                 int ret = mDbAdapter.addJSON(eventJson);
                 if (ret < 0) {
                     String error = "Failed to enqueue the event: " + eventJson;
-                    if (SensorsDataAPI.sharedInstance(mContext).isDebugMode()) {
+                    if (SlDataAPI.sharedInstance(mContext).isDebugMode()) {
                         throw new DebugModeException(error);
                     } else {
-                        SALog.i(TAG, error);
+                        SlLog.i(TAG, error);
                     }
                 }
 
                 final Message m = Message.obtain();
                 m.what = FLUSH_QUEUE;
 
-                if (SensorsDataAPI.sharedInstance(mContext).isDebugMode() || ret ==
+                if (SlDataAPI.sharedInstance(mContext).isDebugMode() || ret ==
                         DbParams.DB_OUT_OF_MEMORY_ERROR) {
                     mWorker.runMessage(m);
                 } else {
                     // track_signup 立即发送
-                    if (type.equals("track_signup") || ret > SensorsDataAPI.sharedInstance(mContext)
+                    if (type.equals("track_signup") || ret > SlDataAPI.sharedInstance(mContext)
                             .getFlushBulkSize()) {
                         mWorker.runMessage(m);
                     } else {
-                        final int interval = SensorsDataAPI.sharedInstance(mContext).getFlushInterval();
+                        final int interval = SlDataAPI.sharedInstance(mContext).getFlushInterval();
                         mWorker.runMessageOnce(m, interval);
                     }
                 }
             }
         } catch (Exception e) {
-            SALog.i(TAG, "enqueueEventMessage error:" + e);
+            SlLog.i(TAG, "enqueueEventMessage error:" + e);
         }
     }
 
@@ -172,18 +174,18 @@ class AnalyticsMessages {
 
     private void sendData() {
         try {
-            if (!SensorsDataAPI.sharedInstance(mContext).isNetworkRequestEnable()) {
-                SALog.i(TAG, "NetworkRequest 已关闭，不发送数据！");
+            if (!SlDataAPI.sharedInstance(mContext).isNetworkRequestEnable()) {
+                SlLog.i(TAG, "NetworkRequest 已关闭，不发送数据！");
                 return;
             }
 
-            if (TextUtils.isEmpty(SensorsDataAPI.sharedInstance(mContext).getServerUrl())) {
-                SALog.i(TAG, "Server url is null or empty.");
+            if (TextUtils.isEmpty(SlDataAPI.sharedInstance(mContext).getServerUrl())) {
+                SlLog.i(TAG, "Server url is null or empty.");
                 return;
             }
 
             //不是主进程
-            if (!SensorsDataAPI.mIsMainProcess) {
+            if (!SlDataAPI.mIsMainProcess) {
                 return;
             }
 
@@ -194,12 +196,12 @@ class AnalyticsMessages {
 
             //不符合同步数据的网络策略
             String networkType = NetworkUtils.networkType(mContext);
-            if (!NetworkUtils.isShouldFlush(networkType, SensorsDataAPI.sharedInstance(mContext).getFlushNetworkPolicy())) {
-                SALog.i(TAG, String.format("您当前网络为 %s，无法发送数据，请确认您的网络发送策略！", networkType));
+            if (!NetworkUtils.isShouldFlush(networkType, SlDataAPI.sharedInstance(mContext).getFlushNetworkPolicy())) {
+                SlLog.i(TAG, String.format("您当前网络为 %s，无法发送数据，请确认您的网络发送策略！", networkType));
                 return;
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         int count = 100;
         Toast toast = null;
@@ -207,7 +209,7 @@ class AnalyticsMessages {
             boolean deleteEvents = true;
             String[] eventsData;
             synchronized (mDbAdapter) {
-                if (SensorsDataAPI.sharedInstance(mContext).isDebugMode()) {
+                if (SlDataAPI.sharedInstance(mContext).isDebugMode()) {
                     /* debug 模式下服务器只允许接收 1 条数据 */
                     eventsData = mDbAdapter.generateDataString(DbParams.TABLE_EVENTS, 1);
                 } else {
@@ -230,7 +232,7 @@ class AnalyticsMessages {
                     // 格式错误，直接将数据删除
                     throw new InvalidDataException(e);
                 }
-                sendHttpRequest(SensorsDataAPI.sharedInstance(mContext).getServerUrl(), data, rawMessage, false);
+                sendHttpRequest(SlDataAPI.sharedInstance(mContext).getServerUrl(), data, rawMessage, false);
             } catch (ConnectErrorException e) {
                 deleteEvents = false;
                 errorMessage = "Connection error: " + e.getMessage();
@@ -243,11 +245,11 @@ class AnalyticsMessages {
                 deleteEvents = false;
                 errorMessage = "Exception: " + e.getMessage();
             } finally {
-                boolean isDebugMode = SensorsDataAPI.sharedInstance(mContext).isDebugMode();
+                boolean isDebugMode = SlDataAPI.sharedInstance(mContext).isDebugMode();
                 if (!TextUtils.isEmpty(errorMessage)) {
-                    if (isDebugMode || SALog.isLogEnabled()) {
-                        SALog.i(TAG, errorMessage);
-                        if (isDebugMode && SensorsDataAPI.SHOW_DEBUG_INFO_VIEW) {
+                    if (isDebugMode || SlLog.isLogEnabled()) {
+                        SlLog.i(TAG, errorMessage);
+                        if (isDebugMode && SlDataAPI.SHOW_DEBUG_INFO_VIEW) {
                             try {
                                 /*
                                  * 问题：https://www.jianshu.com/p/1445e330114b
@@ -261,7 +263,7 @@ class AnalyticsMessages {
                                     toast.show();
                                 }
                             } catch (Exception e) {
-                                SALog.printStackTrace(e);
+                                SlLog.printStackTrace(e);
                             }
                         }
                     }
@@ -269,7 +271,7 @@ class AnalyticsMessages {
 
                 if (deleteEvents || isDebugMode) {
                     count = mDbAdapter.cleanupEvents(lastId);
-                    SALog.i(TAG, String.format(Locale.CHINA, "Events flushed. [left = %d]", count));
+                    SlLog.i(TAG, String.format(Locale.CHINA, "Events flushed. [left = %d]", count));
                 } else {
                     count = 0;
                 }
@@ -287,18 +289,18 @@ class AnalyticsMessages {
             final URL url = new URL(path);
             connection = (HttpURLConnection) url.openConnection();
             if (connection == null) {
-                SALog.i(TAG, String.format("can not connect %s, it shouldn't happen", url.toString()), null);
+                SlLog.i(TAG, String.format("can not connect %s, it shouldn't happen", url.toString()), null);
                 return;
             }
-            if (SensorsDataAPI.sharedInstance().getSSLSocketFactory() != null && connection instanceof HttpsURLConnection) {
-                ((HttpsURLConnection) connection).setSSLSocketFactory(SensorsDataAPI.sharedInstance().getSSLSocketFactory());
+            if (SlDataAPI.sharedInstance().getSSLSocketFactory() != null && connection instanceof HttpsURLConnection) {
+                ((HttpsURLConnection) connection).setSSLSocketFactory(SlDataAPI.sharedInstance().getSSLSocketFactory());
             }
             connection.setInstanceFollowRedirects(false);
-            if (SensorsDataAPI.sharedInstance(mContext).getDebugMode() == SensorsDataAPI.DebugMode.DEBUG_ONLY) {
+            if (SlDataAPI.sharedInstance(mContext).getDebugMode() == SlDataAPI.DebugMode.DEBUG_ONLY) {
                 connection.addRequestProperty("Dry-Run", "true");
             }
 
-            connection.setRequestProperty("Cookie", SensorsDataAPI.sharedInstance(mContext).getCookie(false));
+            connection.setRequestProperty("Cookie", SlDataAPI.sharedInstance(mContext).getCookie(false));
 
             Uri.Builder builder = new Uri.Builder();
             //先校验crc
@@ -323,9 +325,9 @@ class AnalyticsMessages {
             bout.flush();
 
             int responseCode = connection.getResponseCode();
-            SALog.i(TAG, "responseCode: " + responseCode);
-            if (!isRedirects && SensorsDataHttpURLConnectionHelper.needRedirects(responseCode)) {
-                String location = SensorsDataHttpURLConnectionHelper.getLocation(connection, path);
+            SlLog.i(TAG, "responseCode: " + responseCode);
+            if (!isRedirects && SlDataHttpURLConnectionHelper.needRedirects(responseCode)) {
+                String location = SlDataHttpURLConnectionHelper.getLocation(connection, path);
                 if (!TextUtils.isEmpty(location)) {
                     closeStream(bout, out, null, connection);
                     sendHttpRequest(location, data, rawMessage, true);
@@ -342,16 +344,16 @@ class AnalyticsMessages {
             in = null;
 
             String response = new String(responseBody, CHARSET_UTF8);
-            if (SALog.isLogEnabled()) {
+            if (SlLog.isLogEnabled()) {
                 String jsonMessage = JSONUtils.formatJson(rawMessage);
                 // 状态码 200 - 300 间都认为正确
                 if (responseCode >= HttpURLConnection.HTTP_OK &&
                         responseCode < HttpURLConnection.HTTP_MULT_CHOICE) {
-                    SALog.i(TAG, "valid message: \n" + jsonMessage);
+                    SlLog.i(TAG, "valid message: \n" + jsonMessage);
                 } else {
-                    SALog.i(TAG, "invalid message: \n" + jsonMessage);
-                    SALog.i(TAG, String.format(Locale.CHINA, "ret_code: %d", responseCode));
-                    SALog.i(TAG, String.format(Locale.CHINA, "ret_content: %s", response));
+                    SlLog.i(TAG, "invalid message: \n" + jsonMessage);
+                    SlLog.i(TAG, String.format(Locale.CHINA, "ret_code: %d", responseCode));
+                    SlLog.i(TAG, String.format(Locale.CHINA, "ret_content: %s", response));
                 }
             }
             if (responseCode < HttpURLConnection.HTTP_OK || responseCode >= HttpURLConnection.HTTP_MULT_CHOICE) {
@@ -387,7 +389,7 @@ class AnalyticsMessages {
             try {
                 bout.close();
             } catch (Exception e) {
-                SALog.i(TAG, e.getMessage());
+                SlLog.i(TAG, e.getMessage());
             }
         }
 
@@ -395,7 +397,7 @@ class AnalyticsMessages {
             try {
                 out.close();
             } catch (Exception e) {
-                SALog.i(TAG, e.getMessage());
+                SlLog.i(TAG, e.getMessage());
             }
         }
 
@@ -403,7 +405,7 @@ class AnalyticsMessages {
             try {
                 in.close();
             } catch (Exception e) {
-                SALog.i(TAG, e.getMessage());
+                SlLog.i(TAG, e.getMessage());
             }
         }
 
@@ -411,7 +413,7 @@ class AnalyticsMessages {
             try {
                 connection.disconnect();
             } catch (Exception e) {
-                SALog.i(TAG, e.getMessage());
+                SlLog.i(TAG, e.getMessage());
             }
         }
     }
@@ -436,7 +438,7 @@ class AnalyticsMessages {
 
         Worker() {
             final HandlerThread thread =
-                    new HandlerThread("com.sensorsdata.analytics.android.sdk.AnalyticsMessages.Worker",
+                    new HandlerThread("AnalyticsMessages.Worker",
                             Thread.MIN_PRIORITY);
             thread.start();
             mHandler = new AnalyticsMessageHandler(thread.getLooper());
@@ -446,7 +448,7 @@ class AnalyticsMessages {
             synchronized (mHandlerLock) {
                 // We died under suspicious circumstances. Don't try to send any more events.
                 if (mHandler == null) {
-                    SALog.i(TAG, "Dead worker dropping a message: " + msg.what);
+                    SlLog.i(TAG, "Dead worker dropping a message: " + msg.what);
                 } else {
                     mHandler.sendMessage(msg);
                 }
@@ -457,7 +459,7 @@ class AnalyticsMessages {
             synchronized (mHandlerLock) {
                 // We died under suspicious circumstances. Don't try to send any more events.
                 if (mHandler == null) {
-                    SALog.i(TAG, "Dead worker dropping a message: " + msg.what);
+                    SlLog.i(TAG, "Dead worker dropping a message: " + msg.what);
                 } else {
                     if (!mHandler.hasMessages(msg.what)) {
                         mHandler.sendMessageDelayed(msg, delay);
@@ -481,13 +483,13 @@ class AnalyticsMessages {
                         try {
                             mDbAdapter.deleteAllEvents();
                         } catch (Exception e) {
-                            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+                            SlLog.printStackTrace(e);
                         }
                     } else {
-                        SALog.i(TAG, "Unexpected message received by SensorsData worker: " + msg);
+                        SlLog.i(TAG, "Unexpected message received by SlData worker: " + msg);
                     }
                 } catch (final RuntimeException e) {
-                    SALog.i(TAG, "Worker threw an unhandled exception", e);
+                    SlLog.i(TAG, "Worker threw an unhandled exception", e);
                 }
             }
         }

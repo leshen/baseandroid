@@ -1,7 +1,7 @@
-package com.sensorsdata.analytics.android.sdk.visual.model;
+package baseandroid.sl.sdk.analytics.visual.model;
 /*
  * Created by zhangxiangwei on 2020/03/05.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

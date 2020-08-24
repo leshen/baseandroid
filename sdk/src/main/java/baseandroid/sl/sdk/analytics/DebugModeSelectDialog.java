@@ -1,6 +1,6 @@
 /*
  * Created by zhangwei on 2019/04/17.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -29,12 +29,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import baseandroid.sl.sdk.R;
+
 class DebugModeSelectDialog extends Dialog implements View.OnClickListener {
 
     private OnDebugModeViewClickListener onDebugModeDialogClickListener;
-    private SensorsDataAPI.DebugMode currentDebugMode;
+    private SlDataAPI.DebugMode currentDebugMode;
 
-    DebugModeSelectDialog(Context context, SensorsDataAPI.DebugMode debugMode) {
+    DebugModeSelectDialog(Context context, SlDataAPI.DebugMode debugMode) {
         super(context);
         currentDebugMode = debugMode;
     }
@@ -47,7 +49,7 @@ class DebugModeSelectDialog extends Dialog implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.sensors_analytics_debug_mode_dialog_content);
+        setContentView(R.layout.sl_analytics_debug_mode_dialog_content);
         initView();
         Window window = getWindow();
         if (window != null) {
@@ -66,31 +68,31 @@ class DebugModeSelectDialog extends Dialog implements View.OnClickListener {
 
     private void initView() {
         //标题:SDK 调试模式选择
-        TextView debugModeTitle = findViewById(R.id.sensors_analytics_debug_mode_title);
+        TextView debugModeTitle = findViewById(R.id.sl_analytics_debug_mode_title);
         debugModeTitle.setText("SDK 调试模式选择");
 
         //取消
-        TextView debugModeCancel = findViewById(R.id.sensors_analytics_debug_mode_cancel);
+        TextView debugModeCancel = findViewById(R.id.sl_analytics_debug_mode_cancel);
         debugModeCancel.setText("取消");
         debugModeCancel.setOnClickListener(this);
 
         //开启调试模式(不导入数据)
-        TextView debugModeOnly = findViewById(R.id.sensors_analytics_debug_mode_only);
+        TextView debugModeOnly = findViewById(R.id.sl_analytics_debug_mode_only);
         debugModeOnly.setText("开启调试模式（不导入数据）");
         debugModeOnly.setOnClickListener(this);
 
         //"开启调试模式(导入数据)"
-        TextView debugModeTrack = findViewById(R.id.sensors_analytics_debug_mode_track);
+        TextView debugModeTrack = findViewById(R.id.sl_analytics_debug_mode_track);
         debugModeTrack.setText("开启调试模式（导入数据）");
         debugModeTrack.setOnClickListener(this);
 
         String msg = "调试模式已关闭";
-        if (currentDebugMode == SensorsDataAPI.DebugMode.DEBUG_ONLY) {
+        if (currentDebugMode == SlDataAPI.DebugMode.DEBUG_ONLY) {
             msg = "当前为 调试模式（不导入数据）";
-        } else if (currentDebugMode == SensorsDataAPI.DebugMode.DEBUG_AND_TRACK) {
+        } else if (currentDebugMode == SlDataAPI.DebugMode.DEBUG_AND_TRACK) {
             msg = "当前为 测试模式（导入数据）";
         }
-        TextView debugModeMessage = findViewById(R.id.sensors_analytics_debug_mode_message);
+        TextView debugModeMessage = findViewById(R.id.sl_analytics_debug_mode_message);
         debugModeMessage.setText(msg);
 
         //设置按钮点击效果
@@ -131,11 +133,11 @@ class DebugModeSelectDialog extends Dialog implements View.OnClickListener {
             return;
         }
         int id = v.getId();
-        if (id == R.id.sensors_analytics_debug_mode_track) {
-            onDebugModeDialogClickListener.setDebugMode(this, SensorsDataAPI.DebugMode.DEBUG_AND_TRACK);
-        } else if (id == R.id.sensors_analytics_debug_mode_only) {
-            onDebugModeDialogClickListener.setDebugMode(this, SensorsDataAPI.DebugMode.DEBUG_ONLY);
-        } else if (id == R.id.sensors_analytics_debug_mode_cancel) {
+        if (id == R.id.sl_analytics_debug_mode_track) {
+            onDebugModeDialogClickListener.setDebugMode(this, SlDataAPI.DebugMode.DEBUG_AND_TRACK);
+        } else if (id == R.id.sl_analytics_debug_mode_only) {
+            onDebugModeDialogClickListener.setDebugMode(this, SlDataAPI.DebugMode.DEBUG_ONLY);
+        } else if (id == R.id.sl_analytics_debug_mode_cancel) {
             onDebugModeDialogClickListener.onCancel(this);
         }
     }
@@ -143,6 +145,6 @@ class DebugModeSelectDialog extends Dialog implements View.OnClickListener {
     interface OnDebugModeViewClickListener {
         void onCancel(Dialog dialog);
 
-        void setDebugMode(Dialog dialog, SensorsDataAPI.DebugMode debugMode);
+        void setDebugMode(Dialog dialog, SlDataAPI.DebugMode debugMode);
     }
 }

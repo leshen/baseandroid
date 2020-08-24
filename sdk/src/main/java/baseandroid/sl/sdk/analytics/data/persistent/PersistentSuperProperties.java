@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2017/4/10.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.data.persistent;
+package baseandroid.sl.sdk.analytics.data.persistent;
 
 import android.content.SharedPreferences;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
-import com.sensorsdata.analytics.android.sdk.data.PersistentLoader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.concurrent.Future;
+
+import baseandroid.sl.sdk.analytics.data.PersistentLoader;
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 public class PersistentSuperProperties extends PersistentIdentity<JSONObject> {
     public PersistentSuperProperties(Future<SharedPreferences> loadStoredPreferences) {
@@ -35,7 +36,7 @@ public class PersistentSuperProperties extends PersistentIdentity<JSONObject> {
                 try {
                     return new JSONObject(value);
                 } catch (JSONException e) {
-                    SALog.d("Persistent", "failed to load SuperProperties from SharedPreferences.", e);
+                    SlLog.d("Persistent", "failed to load SuperProperties from SharedPreferences.", e);
                     return new JSONObject();
                 }
             }

@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2017/1/5.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -29,6 +29,6 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SensorsDataAutoTrackAppViewScreenUrl {
+public @interface SlDataAutoTrackAppViewScreenUrl {
     String url() default "";
 }

@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import android.content.Context;
 import android.view.OrientationEventListener;
 
-public class SensorsDataScreenOrientationDetector extends OrientationEventListener {
+public class SlDataScreenOrientationDetector extends OrientationEventListener {
     private int mCurrentOrientation;
 
-    public SensorsDataScreenOrientationDetector(Context context, int rate) {
+    public SlDataScreenOrientationDetector(Context context, int rate) {
         super(context, rate);
     }
 

@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,20 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual.snap;
+package baseandroid.sl.sdk.analytics.visual.snap;
 
 import android.annotation.TargetApi;
 import android.view.View;
 
-import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 
 import java.util.List;
 
-@TargetApi(SensorsDataAPI.VTRACK_SUPPORTED_MIN_API)
+import baseandroid.sl.sdk.analytics.SlDataAPI;
+
+@TargetApi(SlDataAPI.VTRACK_SUPPORTED_MIN_API)
 public abstract class ViewVisitor implements Pathfinder.Accumulator {
 
-    private static final String TAG = "SA.ViewVisitor";
+    private static final String TAG = "Sl.ViewVisitor";
     private final List<Pathfinder.PathElement> mPath;
     private final Pathfinder mPathfinder;
 

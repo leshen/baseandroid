@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2018/1/2.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import android.net.Uri;
 import android.text.TextUtils;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 public class ServerUrl {
     private String url;
@@ -39,7 +41,7 @@ public class ServerUrl {
                 token = uri.getQueryParameter("token");
                 project = uri.getQueryParameter("project");
             } catch (Exception e) {
-                com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+                SlLog.printStackTrace(e);
             } finally {
                 if (TextUtils.isEmpty(host)) {
                     host = "";
@@ -87,7 +89,7 @@ public class ServerUrl {
                 }
             }
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return false;
     }

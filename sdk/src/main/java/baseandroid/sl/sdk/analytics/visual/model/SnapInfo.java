@@ -1,6 +1,6 @@
 /*
  * Created by zhangxiangwei on 2020/02/28.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual.model;
+package baseandroid.sl.sdk.analytics.visual.model;
 
 import java.util.List;
 
 public class SnapInfo {
     public String screenName;
+    public boolean hasFragment;
     public String activityTitle;
     public int elementLevel = -1;
     public boolean isWebView = false;

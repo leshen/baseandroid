@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2017/5/5.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.data;
+package baseandroid.sl.sdk.analytics.data;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -29,19 +29,19 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentAppEndData;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentAppPaused;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentAppStartTime;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentLoginId;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentSessionIntervalTime;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
 
-public class SensorsDataContentProvider extends ContentProvider {
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentAppEndData;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentAppPaused;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentAppStartTime;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentLoginId;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentSessionIntervalTime;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
+public class SlDataContentProvider extends ContentProvider {
     private final static int EVENTS = 1;
     private final static int ACTIVITY_START_COUNT = 2;
     private final static int APP_START_TIME = 3;
@@ -52,7 +52,7 @@ public class SensorsDataContentProvider extends ContentProvider {
     private final static int CHANNEL_PERSISTENT = 8;
     private static UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-    private SensorsDataDBHelper dbHelper;
+    private SlDataDBHelper dbHelper;
     private ContentResolver contentResolver;
     private PersistentAppStartTime persistentAppStartTime;
     private PersistentAppEndData persistentAppEndData;
@@ -72,9 +72,9 @@ public class SensorsDataContentProvider extends ContentProvider {
             try {
                 packageName = context.getApplicationContext().getPackageName();
             } catch (UnsupportedOperationException e) {
-                packageName = "com.sensorsdata.analytics.android.sdk.test";
+                packageName = "com.Sldata.analytics.android.sdk.test";
             }
-            String authority = packageName + ".SensorsDataContentProvider";
+            String authority = packageName + ".SlDataContentProvider";
             contentResolver = context.getContentResolver();
             uriMatcher.addURI(authority, DbParams.TABLE_EVENTS, EVENTS);
             uriMatcher.addURI(authority, DbParams.TABLE_ACTIVITY_START_COUNT, ACTIVITY_START_COUNT);
@@ -84,7 +84,7 @@ public class SensorsDataContentProvider extends ContentProvider {
             uriMatcher.addURI(authority, DbParams.TABLE_SESSION_INTERVAL_TIME, SESSION_INTERVAL_TIME);
             uriMatcher.addURI(authority, DbParams.TABLE_LOGIN_ID, LOGIN_ID);
             uriMatcher.addURI(authority, DbParams.TABLE_CHANNEL_PERSISTENT, CHANNEL_PERSISTENT);
-            dbHelper = new SensorsDataDBHelper(context);
+            dbHelper = new SlDataDBHelper(context);
 
             /* 迁移数据，并删除老的数据库 */
             try {
@@ -104,7 +104,7 @@ public class SensorsDataContentProvider extends ContentProvider {
                             database.insert(DbParams.TABLE_EVENTS, "_id", cv);
                         } catch (SQLiteException e) {
                             isDbWritable = false;
-                            SALog.printStackTrace(e);
+                            SlLog.printStackTrace(e);
                         }
                     }
                 }
@@ -112,7 +112,7 @@ public class SensorsDataContentProvider extends ContentProvider {
                     context.deleteDatabase(packageName);
                 }
             } catch (Exception e) {
-                SALog.printStackTrace(e);
+                SlLog.printStackTrace(e);
             }
             PersistentLoader.initLoader(context);
             persistentAppEndData = (PersistentAppEndData) PersistentLoader.loadPersistent(DbParams.TABLE_APP_END_DATA);
@@ -138,12 +138,12 @@ public class SensorsDataContentProvider extends ContentProvider {
                     deletedCounts = database.delete(DbParams.TABLE_EVENTS, selection, selectionArgs);
                 } catch (SQLiteException e) {
                     isDbWritable = false;
-                    SALog.printStackTrace(e);
+                    SlLog.printStackTrace(e);
                 }
             }
             //目前逻辑不处理其他 Code
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return deletedCounts;
     }
@@ -171,7 +171,7 @@ public class SensorsDataContentProvider extends ContentProvider {
             }
             return uri;
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return uri;
     }
@@ -182,7 +182,7 @@ public class SensorsDataContentProvider extends ContentProvider {
             database = dbHelper.getWritableDatabase();
         } catch (SQLiteException e) {
             isDbWritable = false;
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
             return uri;
         }
         if (!values.containsKey(DbParams.KEY_DATA) || !values.containsKey(DbParams.KEY_CREATED_AT)) {
@@ -198,7 +198,7 @@ public class SensorsDataContentProvider extends ContentProvider {
             database = dbHelper.getWritableDatabase();
         } catch (SQLiteException e) {
             isDbWritable = false;
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
             return uri;
         }
         if (!values.containsKey(DbParams.KEY_CHANNEL_EVENT_NAME) || !values.containsKey(DbParams.KEY_CHANNEL_RESULT)) {
@@ -220,7 +220,7 @@ public class SensorsDataContentProvider extends ContentProvider {
                 database = dbHelper.getWritableDatabase();
             } catch (SQLiteException e) {
                 isDbWritable = false;
-                SALog.printStackTrace(e);
+                SlLog.printStackTrace(e);
                 return 0;
             }
             database.beginTransaction();
@@ -253,7 +253,7 @@ public class SensorsDataContentProvider extends ContentProvider {
                 cursor = query(code);
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return cursor;
     }
@@ -264,7 +264,7 @@ public class SensorsDataContentProvider extends ContentProvider {
             cursor = dbHelper.getWritableDatabase().query(tableName, projection, selection, selectionArgs, null, null, sortOrder);
         } catch (SQLiteException e) {
             isDbWritable = false;
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
         return cursor;
     }

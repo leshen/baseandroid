@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 
 import android.os.SystemClock;
 import android.text.TextUtils;
-
-import com.sensorsdata.analytics.android.sdk.data.DbAdapter;
-import com.sensorsdata.analytics.android.sdk.util.SensorsDataTimer;
 
 import org.json.JSONObject;
 
@@ -30,21 +27,25 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
-class SensorsDataExceptionHandler implements Thread.UncaughtExceptionHandler {
+import baseandroid.sl.sdk.analytics.data.DbAdapter;
+import baseandroid.sl.sdk.analytics.util.SlDataTimer;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
+class SlDataExceptionHandler implements Thread.UncaughtExceptionHandler {
     private static final int SLEEP_TIMEOUT_MS = 500;
 
-    private static SensorsDataExceptionHandler sInstance;
+    private static SlDataExceptionHandler sInstance;
     private Thread.UncaughtExceptionHandler mDefaultExceptionHandler;
     private static boolean isTrackCrash = false;
 
-    private SensorsDataExceptionHandler() {
+    private SlDataExceptionHandler() {
         mDefaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
 
     synchronized static void init() {
         if (sInstance == null) {
-            sInstance = new SensorsDataExceptionHandler();
+            sInstance = new SlDataExceptionHandler();
         }
     }
 
@@ -71,15 +72,15 @@ class SensorsDataExceptionHandler implements Thread.UncaughtExceptionHandler {
                         String result = writer.toString();
                         messageProp.put("app_crashed_reason", result);
                     } catch (Exception ex) {
-                        SALog.printStackTrace(ex);
+                        SlLog.printStackTrace(ex);
                     }
-                    SensorsDataAPI.sharedInstance().trackEvent(EventType.TRACK, "AppCrashed", messageProp, null);
+                    SlDataAPI.sharedInstance().trackEvent(EventType.TRACK, "AppCrashed", messageProp, null);
                 } catch (Exception ex) {
-                    SALog.printStackTrace(ex);
+                    SlLog.printStackTrace(ex);
                 }
             }
 
-            SensorsDataTimer.getInstance().shutdownTimerTask();
+            SlDataTimer.getInstance().shutdownTimerTask();
             /*
              * 异常的情况会出现两种：
              * 1. 未完成 $AppEnd 事件，触发的异常，此时需要记录下 AppEndTime
@@ -91,12 +92,12 @@ class SensorsDataExceptionHandler implements Thread.UncaughtExceptionHandler {
             DbAdapter.getInstance().commitAppEndTime(System.currentTimeMillis());
             // 注意这里要重置为 0，对于跨进程的情况，如果子进程崩溃，主进程但是没崩溃，造成统计个数异常，所以要重置为 0。
             DbAdapter.getInstance().commitActivityCount(0);
-            SensorsDataAPI.sharedInstance().flush();
+            SlDataAPI.sharedInstance().flush();
 
             try {
                 Thread.sleep(SLEEP_TIMEOUT_MS);
             } catch (InterruptedException e1) {
-                SALog.printStackTrace(e1);
+                SlLog.printStackTrace(e1);
             }
             if (mDefaultExceptionHandler != null) {
                 mDefaultExceptionHandler.uncaughtException(t, e);

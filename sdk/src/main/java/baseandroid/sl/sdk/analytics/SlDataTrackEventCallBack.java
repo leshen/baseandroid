@@ -1,6 +1,6 @@
 /*
  * Created by qingyou.ren on 2019/03/04.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
  */
 
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import org.json.JSONObject;
 
-public interface SensorsDataTrackEventCallBack {
+public interface SlDataTrackEventCallBack {
     /**
      * 事件回调接口
      *

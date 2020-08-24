@@ -2,9 +2,11 @@ package tools.shenle.baseandroid
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.fragment_main.*
 import tools.shenle.baseandroid.home.fragment.*
+import tools.shenle.baseandroid.R
 import tools.shenle.slbaseandroid.baseall.BaseFragmentSl
 
 /**
@@ -69,12 +71,34 @@ class MainFragment:BaseFragmentSl() {
     }
 
     private fun initViewPager() {
-        vp2.isUserInputEnabled = false
+        vp2.isUserInputEnabled = true
         vp2.offscreenPageLimit = 2
         vp2.adapter = object : FragmentStateAdapter(this) {
             override fun createFragment(position: Int) = fragmentList[position]
 
             override fun getItemCount() = fragmentList.size
         }
+        vp2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                bnv.selectedItemId = when (position) {
+                    0 -> {
+                        R.id.main0
+                    }
+                    1 -> {
+                        R.id.main1
+                    }
+                    2 -> {
+                        R.id.main2
+                    }
+                    3 -> {
+                        R.id.main3
+                    }
+                    4 -> {
+                        R.id.main4
+                    }
+                    else->R.id.main0
+                }
+            }
+        })
     }
 }

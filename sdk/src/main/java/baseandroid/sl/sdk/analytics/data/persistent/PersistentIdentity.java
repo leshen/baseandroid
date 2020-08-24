@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,21 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.data.persistent;
+package baseandroid.sl.sdk.analytics.data.persistent;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
 @SuppressLint("CommitPrefEdits")
 public abstract class PersistentIdentity<T> {
 
-    private static final String TAG = "SA.PersistentIdentity";
+    private static final String TAG = "Sl.PersistentIdentity";
     private final Future<SharedPreferences> loadStoredPreferences;
     private final PersistentSerializer serializer;
     private final String persistentKey;
@@ -57,9 +58,9 @@ public abstract class PersistentIdentity<T> {
                         data = sharedPreferences.getString(persistentKey, null);
                     }
                 } catch (final ExecutionException e) {
-                    SALog.d(TAG, "Cannot read distinct ids from sharedPreferences.", e.getCause());
+                    SlLog.d(TAG, "Cannot read distinct ids from sharedPreferences.", e.getCause());
                 } catch (final InterruptedException e) {
-                    SALog.d(TAG, "Cannot read distinct ids from sharedPreferences.", e);
+                    SlLog.d(TAG, "Cannot read distinct ids from sharedPreferences.", e);
                 }
 
                 if (data == null) {
@@ -87,9 +88,9 @@ public abstract class PersistentIdentity<T> {
             try {
                 sharedPreferences = loadStoredPreferences.get();
             } catch (final ExecutionException e) {
-                SALog.d(TAG, "Cannot read distinct ids from sharedPreferences.", e.getCause());
+                SlLog.d(TAG, "Cannot read distinct ids from sharedPreferences.", e.getCause());
             } catch (final InterruptedException e) {
-                SALog.d(TAG, "Cannot read distinct ids from sharedPreferences.", e);
+                SlLog.d(TAG, "Cannot read distinct ids from sharedPreferences.", e);
             }
 
             if (sharedPreferences == null) {

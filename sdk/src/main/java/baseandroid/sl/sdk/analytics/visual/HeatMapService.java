@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2017/9/7.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual;
+package baseandroid.sl.sdk.analytics.visual;
 
 import android.app.Activity;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 public class HeatMapService {
     private static HeatMapService instance;
@@ -43,7 +45,7 @@ public class HeatMapService {
                 mVTrack.stopUpdates(false);
             }
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -53,7 +55,7 @@ public class HeatMapService {
                 mVTrack.startUpdates();
             }
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -68,7 +70,7 @@ public class HeatMapService {
             }
             if (Build.VERSION.SDK_INT >= 16) {
                 String resourcePackageName =
-                        configBundle.getString("com.sensorsdata.analytics.android.ResourcePackageName");
+                        configBundle.getString("com.Sldata.analytics.android.ResourcePackageName");
                 if (null == resourcePackageName) {
                     resourcePackageName = activity.getPackageName();
                 }
@@ -77,7 +79,7 @@ public class HeatMapService {
                 mVTrack.startUpdates();
             }
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 }

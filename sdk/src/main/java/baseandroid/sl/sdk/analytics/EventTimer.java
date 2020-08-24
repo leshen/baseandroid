@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2017/4/10.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import android.os.SystemClock;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 class EventTimer {
     private final TimeUnit timeUnit;
@@ -61,7 +63,7 @@ class EventTimer {
             }
             return durationFloat < 0 ? String.valueOf(0) : String.format(Locale.CHINA, "%.3f", durationFloat);
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
             return String.valueOf(0);
         }
     }

@@ -1,6 +1,6 @@
 /*
  * Created by zhangxiangwei on 2019/11/05.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 public interface ThreadNameConstants {
-    String THREAD_APP_END_DATA_SAVE_TIMER = "SA.AppEndDataSaveTimerThread";
-    String THREAD_TASK_QUEUE = "SA.TaskQueueThread";
-    String THREAD_SEND_DISTINCT_ID = "SA.SendDistinctIDThread";
-    String THREAD_GET_SDK_REMOTE_CONFIG = "SA.GetSDKRemoteConfigThread";
+    String THREAD_APP_END_DATA_SAVE_TIMER = "Sl.AppEndDataSaveTimerThread";
+    String THREAD_TASK_QUEUE = "Sl.TaskQueueThread";
+    String THREAD_SEND_DISTINCT_ID = "Sl.SendDistinctIDThread";
+    String THREAD_GET_SDK_REMOTE_CONFIG = "Sl.GetSDKRemoteConfigThread";
+    String THREAD_DEEP_LINK_REQUEST = "Sl.DeepLinkRequest";
 }

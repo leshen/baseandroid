@@ -1,6 +1,6 @@
 /*
  * Created by zhangwei on 2019/04/19.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import org.json.JSONObject;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 
 public final class PropertyBuilder {
@@ -69,14 +71,14 @@ public final class PropertyBuilder {
      */
     public PropertyBuilder append(Object... keyValuePairs) {
         if (keyValuePairs == null || keyValuePairs.length <= 1) {
-            SALog.i(TAG, "The key value pair is incorrect.");
+            SlLog.i(TAG, "The key value pair is incorrect.");
             return this;
         }
         for (int index = 0; index < keyValuePairs.length; index++) {
             Object keyObj = keyValuePairs[index];
             index = index + 1;
             if (index >= keyValuePairs.length) {
-                SALog.i(TAG, "this element key[index= " + index + "] will be ignored," +
+                SlLog.i(TAG, "this element key[index= " + index + "] will be ignored," +
                         " because no element can pair with it. ");
                 return this;
             }
@@ -84,7 +86,7 @@ public final class PropertyBuilder {
             if (keyObj instanceof String) {
                 innerPropertyMap.put((String) keyObj, valueObj);
             } else {
-                SALog.i(TAG, "this element key[index= " + index + "] is not a String," +
+                SlLog.i(TAG, "this element key[index= " + index + "] is not a String," +
                         " the method will ignore the element and the next element. ");
             }
         }
@@ -107,7 +109,7 @@ public final class PropertyBuilder {
             try {
                 jsonObject.put(key, innerPropertyMap.get(key));
             } catch (Exception ex) {
-                SALog.printStackTrace(ex);
+                SlLog.printStackTrace(ex);
             }
         }
         return jsonObject;

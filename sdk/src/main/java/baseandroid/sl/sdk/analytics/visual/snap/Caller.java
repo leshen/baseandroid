@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual.snap;
+package baseandroid.sl.sdk.analytics.visual.snap;
 
 import android.view.View;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import baseandroid.sl.sdk.analytics.util.SlLog;
+
 public class Caller {
 
-    private static final String TAG = "SA.Caller";
+    private static final String TAG = "Sl.Caller";
     private final String mMethodName;
     private final Object[] mMethodArgs;
     private final Class<?> mMethodResultType;
@@ -99,12 +100,12 @@ public class Caller {
             try {
                 return mTargetMethod.invoke(target, arguments);
             } catch (final IllegalAccessException e) {
-                SALog.i(TAG, "Method " + mTargetMethod.getName() + " appears not to be public", e);
+                SlLog.i(TAG, "Method " + mTargetMethod.getName() + " appears not to be public", e);
             } catch (final IllegalArgumentException e) {
-                SALog.i(TAG,
+                SlLog.i(TAG,
                         "Method " + mTargetMethod.getName() + " called with arguments of the wrong type", e);
             } catch (final InvocationTargetException e) {
-                SALog.i(TAG, "Method " + mTargetMethod.getName() + " threw an exception", e);
+                SlLog.i(TAG, "Method " + mTargetMethod.getName() + " threw an exception", e);
             }
         }
 

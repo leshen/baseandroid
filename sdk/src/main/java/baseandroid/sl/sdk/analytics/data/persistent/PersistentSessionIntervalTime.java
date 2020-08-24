@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2017/4/10.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.data.persistent;
+package baseandroid.sl.sdk.analytics.data.persistent;
 
 import android.content.SharedPreferences;
 
-import com.sensorsdata.analytics.android.sdk.data.PersistentLoader;
 
 import java.util.concurrent.Future;
+
+import baseandroid.sl.sdk.analytics.data.PersistentLoader;
 
 public class PersistentSessionIntervalTime extends PersistentIdentity<Integer> {
     public PersistentSessionIntervalTime(Future<SharedPreferences> loadStoredPreferences) {
@@ -38,7 +39,9 @@ public class PersistentSessionIntervalTime extends PersistentIdentity<Integer> {
 
             @Override
             public Integer create() {
-                return 30 * 1000;
+                //shenle 改为10
+                return 10 * 1000;
+//                return 30 * 1000;
             }
         });
     }

@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2017/4/12.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
@@ -33,35 +34,43 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
-import com.sensorsdata.analytics.android.sdk.data.DbAdapter;
-import com.sensorsdata.analytics.android.sdk.data.DbParams;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentFirstDay;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentFirstStart;
-import com.sensorsdata.analytics.android.sdk.util.AopUtil;
-import com.sensorsdata.analytics.android.sdk.util.ChannelUtils;
-import com.sensorsdata.analytics.android.sdk.util.TimeUtils;
-import com.sensorsdata.analytics.android.sdk.util.SensorsDataTimer;
-import com.sensorsdata.analytics.android.sdk.util.SensorsDataUtils;
-import com.sensorsdata.analytics.android.sdk.visual.HeatMapService;
-import com.sensorsdata.analytics.android.sdk.visual.VisualizedAutoTrackService;
 
 import org.json.JSONObject;
 
 import java.util.Locale;
 
+import baseandroid.sl.sdk.analytics.data.DbAdapter;
+import baseandroid.sl.sdk.analytics.data.DbParams;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstDay;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstStart;
+import baseandroid.sl.sdk.analytics.deeplink.DeepLinkManager;
+import baseandroid.sl.sdk.analytics.deeplink.DeepLinkProcessor;
+import baseandroid.sl.sdk.analytics.internal.ScreenAutoTracker;
+import baseandroid.sl.sdk.analytics.visual.HeatMapService;
+import baseandroid.sl.sdk.analytics.visual.VisualizedAutoTrackService;
+import baseandroid.sl.sdk.analytics.util.AopUtil;
+import baseandroid.sl.sdk.analytics.util.ChannelUtils;
+import baseandroid.sl.sdk.analytics.util.SlDataTimer;
+import baseandroid.sl.sdk.analytics.util.SlDataUtils;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+import baseandroid.sl.sdk.analytics.util.TimeUtils;
+
+import static baseandroid.sl.sdk.analytics.deeplink.DeepLinkManager.IS_ANALYTICS_DEEPLINK;
+import static baseandroid.sl.sdk.analytics.deeplink.DeepLinkManager.IS_RESUMED_ANALYTICS_DEEPLINK;
+
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
-    private static final String TAG = "SA.LifecycleCallbacks";
+class SlDataActivityLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
+    private static final String TAG = "Sl.LifecycleCallbacks";
     private static final String EVENT_TIMER = "event_timer";
     private static final String LIB_VERSION = "$lib_version";
     private static final String APP_VERSION = "$app_version";
-    private final SensorsDataAPI mSensorsDataInstance;
+    private final SlDataAPI mSlDataInstance;
     private final PersistentFirstStart mFirstStart;
     private final PersistentFirstDay mFirstDay;
     private Context mContext;
     private boolean resumeFromBackground = false;
-    // AppEnd 事件触发默认 Session = 30s
+    // AppEnd 事件触发默认 Session = 30s shenle改成10秒
     private int sessionTime;
     private DbAdapter mDbAdapter;
     private JSONObject activityProperty = new JSONObject();
@@ -86,6 +95,8 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
     private Handler handler;
     /* 兼容由于在魅族手机上退到后台后，线程会被休眠，导致 $AppEnd 无法触发，造成再次打开重复发送。*/
     private long messageReceiveTime = 0L;
+
+    private DeepLinkProcessor mDeepLinkInfo;
     /**
      * 打点时间间隔：2000 毫秒
      */
@@ -93,42 +104,42 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
     private Runnable timer = new Runnable() {
         @Override
         public void run() {
-            if (mSensorsDataInstance.isAutoTrackEnabled() && isAutoTrackAppEnd()) {
+            if (mSlDataInstance.isAutoTrackEnabled() && isAutoTrackAppEnd()) {
                 generateAppEndData();
             }
         }
     };
 
-    SensorsDataActivityLifecycleCallbacks(SensorsDataAPI instance, PersistentFirstStart firstStart,
-                                          PersistentFirstDay firstDay, Context context) {
-        this.mSensorsDataInstance = instance;
+    SlDataActivityLifecycleCallbacks(SlDataAPI instance, PersistentFirstStart firstStart,
+                                     PersistentFirstDay firstDay, Context context) {
+        this.mSlDataInstance = instance;
         this.mFirstStart = firstStart;
         this.mFirstDay = firstDay;
         this.mContext = context;
         this.mDbAdapter = DbAdapter.getInstance();
-        this.isMultiProcess = mSensorsDataInstance.isMultiProcess();
+        this.isMultiProcess = mSlDataInstance.isMultiProcess();
         this.sessionTime = mDbAdapter.getSessionIntervalTime();
         try {
             final PackageManager manager = mContext.getPackageManager();
             final PackageInfo info = manager.getPackageInfo(mContext.getPackageName(), 0);
             app_version = info.versionName;
-            lib_version = SensorsDataAPI.VERSION;
+            lib_version = SlDataAPI.VERSION;
         } catch (final Exception e) {
-            SALog.i(TAG, "Exception getting version name = ", e);
+            SlLog.i(TAG, "Exception getting version name = ", e);
         }
         initHandler();
     }
 
     @Override
     public void onActivityCreated(Activity activity, Bundle bundle) {
-        SensorsDataUtils.handleSchemeUrl(activity, activity.getIntent());
+        SlDataUtils.handleSchemeUrl(activity, activity.getIntent());
     }
 
     @Override
     public void onActivityStarted(Activity activity) {
         try {
             activityProperty = AopUtil.buildTitleNoAutoTrackerProperties(activity);
-            SensorsDataUtils.mergeJSONObject(activityProperty, endDataProperty);
+            SlDataUtils.mergeJSONObject(activityProperty, endDataProperty);
             if (isMultiProcess) {
                 startActivityCount = mDbAdapter.getActivityCount();
                 mDbAdapter.commitActivityCount(++startActivityCount);
@@ -137,8 +148,8 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
             }
             // 如果是第一个页面
             if (startActivityCount == 1) {
-                if (mSensorsDataInstance.isSaveDeepLinkInfo()) {// 保存 utm 信息时,在 endData 中合并保存的 latestUtm 信息。
-                    SensorsDataUtils.mergeJSONObject(ChannelUtils.getLatestUtmProperties(), endDataProperty);
+                if (mSlDataInstance.isSaveDeepLinkInfo()) {// 保存 utm 信息时,在 endData 中合并保存的 latestUtm 信息。
+                    SlDataUtils.mergeJSONObject(ChannelUtils.getLatestUtmProperties(), endDataProperty);
                 }
                 handler.removeMessages(MESSAGE_END);
                 boolean sessionTimeOut = isSessionTimeOut();
@@ -150,34 +161,42 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
                     boolean firstStart = mFirstStart.get();
 
                     try {
-                        mSensorsDataInstance.appBecomeActive();
+                        mSlDataInstance.appBecomeActive();
                     } catch (Exception e) {
-                        SALog.printStackTrace(e);
+                        SlLog.printStackTrace(e);
                     }
 
                     //从后台恢复，从缓存中读取 SDK 控制配置信息
                     if (resumeFromBackground) {
                         //先从缓存中读取 SDKConfig
-                        mSensorsDataInstance.applySDKConfigFromCache();
-                        mSensorsDataInstance.resumeTrackScreenOrientation();
-//                    mSensorsDataInstance.resumeTrackTaskThread();
+                        mSlDataInstance.applySDKConfigFromCache();
+                        mSlDataInstance.resumeTrackScreenOrientation();
+//                    mSlDataInstance.resumeTrackTaskThread();
                     }
                     //每次启动 App，重新拉取最新的配置信息
-                    mSensorsDataInstance.pullSDKConfigFromServer();
+                    mSlDataInstance.pullSDKConfigFromServer();
 
                     try {
-                        if (mSensorsDataInstance.isAutoTrackEnabled() && !mSensorsDataInstance.isAutoTrackEventTypeIgnored(SensorsDataAPI.AutoTrackEventType.APP_START)) {
+                        if (mSlDataInstance.isAutoTrackEnabled() && !mSlDataInstance.isAutoTrackEventTypeIgnored(SlDataAPI.AutoTrackEventType.APP_START)) {
                             if (firstStart) {
                                 mFirstStart.commit(false);
                             }
                             JSONObject properties = new JSONObject();
                             properties.put("$resume_from_background", resumeFromBackground);
                             properties.put("$is_first_time", firstStart);
-                            SensorsDataUtils.mergeJSONObject(activityProperty, properties);
-                            if (ChannelUtils.parseUtmFromActivity(activity, true, mSensorsDataInstance.isSaveDeepLinkInfo())) {
-                                SensorsDataUtils.mergeJSONObject(ChannelUtils.getUtmProperties(), properties);
+                            SlDataUtils.mergeJSONObject(activityProperty, properties);
+                            Intent intent = activity.getIntent();
+                            mDeepLinkInfo = DeepLinkManager.createDeepLink(intent, mSlDataInstance.getServerUrl());
+                            if (mDeepLinkInfo != null) {
+                                if (!intent.getBooleanExtra(IS_ANALYTICS_DEEPLINK, false)) {
+                                    ChannelUtils.removeDeepLinkInfo(endDataProperty);
+                                    //清除本地 utm 属性
+                                    ChannelUtils.clearUtm(activity.getApplicationContext());
+                                    DeepLinkManager.parseDeepLink(mDeepLinkInfo, activity, properties, endDataProperty, mSlDataInstance.isSaveDeepLinkInfo(), mSlDataInstance.getDeepLinkCallback());
+                                    intent.putExtra(IS_ANALYTICS_DEEPLINK, true);
+                                }
                             }
-                            mSensorsDataInstance.trackInternal("$AppStart", properties);
+                            mSlDataInstance.trackInternal("$AppStart", properties);
                         }
 
                         try {
@@ -187,7 +206,7 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
                             mDbAdapter.commitAppStartTime(SystemClock.elapsedRealtime());
                         }
                     } catch (Exception e) {
-                        SALog.i(TAG, e);
+                        SlLog.i(TAG, e);
                     }
 
                     if (resumeFromBackground) {
@@ -195,7 +214,7 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
                             HeatMapService.getInstance().resume();
                             VisualizedAutoTrackService.getInstance().resume();
                         } catch (Exception e) {
-                            SALog.printStackTrace(e);
+                            SlLog.printStackTrace(e);
                         }
                     }
 
@@ -210,40 +229,86 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
                  *  1. App 在 onResume 之前 Crash，导致只有启动没有退出；
                  *  2. 多进程的情况下只会开启一个打点器；
                  */
-                SensorsDataTimer.getInstance().timer(timer, 0, TIME_INTERVAL);
+                SlDataTimer.getInstance().timer(timer, 0, TIME_INTERVAL);
+            }
+            try {
+                if (mSlDataInstance.isAutoTrackEnabled() && !mSlDataInstance.isActivityAutoTrackAppViewScreenIgnored(activity.getClass())
+                        && !mSlDataInstance.isAutoTrackEventTypeIgnored(SlDataAPI.AutoTrackEventType.APP_VIEW_SCREEN)) {
+                    if (mSlDataInstance.getLifeCallEventListener() != null) {
+                        doOnActivityPush(activity);
+                    }
+                }
+            } catch (Exception e) {
+                SlLog.printStackTrace(e);
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
     @Override
     public void onActivityResumed(final Activity activity) {
         try {
-            JSONObject utmProperties = null;
-            if (ChannelUtils.parseUtmFromActivity(activity, false, mSensorsDataInstance.isSaveDeepLinkInfo())) {
-                utmProperties = ChannelUtils.getUtmProperties();
-                ChannelUtils.removeDeepLinkInfo(endDataProperty);
-                SensorsDataUtils.mergeJSONObject(ChannelUtils.getLatestUtmProperties(), endDataProperty);
-            }
-            if (mSensorsDataInstance.isAutoTrackEnabled() && !mSensorsDataInstance.isActivityAutoTrackAppViewScreenIgnored(activity.getClass())
-                    && !mSensorsDataInstance.isAutoTrackEventTypeIgnored(SensorsDataAPI.AutoTrackEventType.APP_VIEW_SCREEN)) {
-                JSONObject properties = new JSONObject();
-                if (utmProperties != null && utmProperties.length() > 0) {
-                    SensorsDataUtils.mergeJSONObject(utmProperties, properties);
+            if (mSlDataInstance.isAutoTrackEnabled() && !mSlDataInstance.isActivityAutoTrackAppViewScreenIgnored(activity.getClass())
+                    && !mSlDataInstance.isAutoTrackEventTypeIgnored(SlDataAPI.AutoTrackEventType.APP_VIEW_SCREEN)) {
+                if (mSlDataInstance.getLifeCallEventListener() != null) {
+                    mSlDataInstance.getLifeCallEventListener().onResumeActivity(activity);
+                } else {
+                    doOnActivityPush(activity);
                 }
-                SensorsDataUtils.mergeJSONObject(activityProperty, properties);
+            }
+        } catch (Exception e) {
+            SlLog.printStackTrace(e);
+        }
+    }
+
+    private void doOnActivityPush(Activity activity) {
+        try {
+            JSONObject properties = new JSONObject();
+            Intent intent = activity.getIntent();
+            if (mDeepLinkInfo == null) {
+                mDeepLinkInfo = DeepLinkManager.createDeepLink(intent, mSlDataInstance.getServerUrl());
+            }
+            if (mDeepLinkInfo != null) {
+                //判断 deepLink 信息是否已处理过
+                if (!intent.getBooleanExtra(IS_ANALYTICS_DEEPLINK, false)) {
+                    ChannelUtils.removeDeepLinkInfo(endDataProperty);
+                    //清除本地 utm 属性
+                    ChannelUtils.clearUtm(activity.getApplicationContext());
+                    DeepLinkManager.parseDeepLink(mDeepLinkInfo, activity, properties, endDataProperty, mSlDataInstance.isSaveDeepLinkInfo(), mSlDataInstance.getDeepLinkCallback());
+                    intent.putExtra(IS_ANALYTICS_DEEPLINK, true);
+                    intent.putExtra(IS_RESUMED_ANALYTICS_DEEPLINK, true);
+                } else if (!intent.getBooleanExtra(IS_RESUMED_ANALYTICS_DEEPLINK, false)) {
+                    mDeepLinkInfo.mergeDeepLinkProperty(properties);
+                    intent.putExtra(IS_RESUMED_ANALYTICS_DEEPLINK, true);
+                }
+                mDeepLinkInfo = null;
+            }
+            if (mSlDataInstance.isAutoTrackEnabled() && !mSlDataInstance.isActivityAutoTrackAppViewScreenIgnored(activity.getClass())
+                    && !mSlDataInstance.isAutoTrackEventTypeIgnored(SlDataAPI.AutoTrackEventType.APP_VIEW_SCREEN)) {
+                if (SlDataAPI.sharedInstance().getLifeCallEventListener() != null) {
+                    SlDataAPI.sharedInstance().getLifeCallEventListener().onUpActivity(activity);
+                }
+//                else {
+                if (activity instanceof ScreenAutoTracker) {
+
+                }else{
+                    properties.put("$isScreenAutoTracker", 0);
+                }
+                SlDataUtils.mergeJSONObject(activityProperty, properties);
                 if (activity instanceof ScreenAutoTracker) {
                     ScreenAutoTracker screenAutoTracker = (ScreenAutoTracker) activity;
                     JSONObject otherProperties = screenAutoTracker.getTrackProperties();
                     if (otherProperties != null) {
-                        SensorsDataUtils.mergeJSONObject(otherProperties, properties);
+                        SlDataUtils.mergeJSONObject(otherProperties, properties);
                     }
+                    properties.put("$isScreenAutoTracker", "1");
                 }
-                mSensorsDataInstance.trackViewScreen(SensorsDataUtils.getScreenUrl(activity), properties);
+                mSlDataInstance.trackViewScreen(SlDataUtils.getScreenUrl(activity), properties);
+//                }
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -257,10 +322,10 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
             // 停止计时器，针对跨进程的情况，要停止当前进程的打点器
             startTimerCount--;
             if (startTimerCount == 0) {
-                SensorsDataTimer.getInstance().shutdownTimerTask();
+                SlDataTimer.getInstance().shutdownTimerTask();
             }
 
-            if (mSensorsDataInstance.isMultiProcess()) {
+            if (mSlDataInstance.isMultiProcess()) {
                 startActivityCount = mDbAdapter.getActivityCount();
                 startActivityCount = startActivityCount > 0 ? --startActivityCount : 0;
                 mDbAdapter.commitActivityCount(startActivityCount);
@@ -277,7 +342,7 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
                 handler.sendMessageDelayed(generateMessage(true), sessionTime);
             }
         } catch (Exception ex) {
-            SALog.printStackTrace(ex);
+            SlLog.printStackTrace(ex);
         }
     }
 
@@ -292,12 +357,12 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
     /**
      * 发送 $AppEnd 事件
      *
-     * @param pausedTime 退出时间
+     * @param pausedTime  退出时间
      * @param jsonEndData $AppEnd 事件属性
      */
     private void trackAppEnd(long startTime, long pausedTime, String jsonEndData) {
         try {
-            if (mSensorsDataInstance.isAutoTrackEnabled() && isAutoTrackAppEnd()) {
+            if (mSlDataInstance.isAutoTrackEnabled() && isAutoTrackAppEnd()) {
                 if (!TextUtils.isEmpty(jsonEndData)) {
                     JSONObject endDataJsonObject = new JSONObject(jsonEndData);
                     long endTime = endDataJsonObject.optLong(EVENT_TIMER); // 获取结束时间戳
@@ -310,13 +375,13 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
                     properties.put("event_duration", duration(startTime, endTime));
                     properties.put("event_time", pausedTime);
                     ChannelUtils.mergeUtmToEndData(endDataJsonObject, properties);
-                    mSensorsDataInstance.trackInternal("$AppEnd", properties);
+                    mSlDataInstance.trackInternal("$AppEnd", properties);
                     mDbAdapter.commitAppEndData(""); // 保存的信息只使用一次就置空，防止后面状态错乱再次发送。
-                    mSensorsDataInstance.flushSync();
+                    mSlDataInstance.flushSync();
                 }
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -324,7 +389,7 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
      * 计算退出事件时长
      *
      * @param startTime 启动时间
-     * @param endTime 退出时间
+     * @param endTime   退出时间
      * @return 时长
      */
     private String duration(long startTime, long endTime) {
@@ -336,7 +401,7 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
             float durationFloat = duration / 1000.0f;
             return durationFloat < 0 ? String.valueOf(0) : String.format(Locale.CHINA, "%.3f", durationFloat);
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
             return String.valueOf(0);
         }
     }
@@ -352,7 +417,7 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
             mDbAdapter.commitAppEndData(endDataProperty.toString());
             mDbAdapter.commitAppEndTime(System.currentTimeMillis());
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -364,7 +429,7 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
     private boolean isSessionTimeOut() {
         long currentTime = System.currentTimeMillis() > 946656000000L ? System.currentTimeMillis() : 946656000000L;
         boolean sessionTimeOut = Math.abs(currentTime - mDbAdapter.getAppEndTime()) > sessionTime;
-        SALog.d(TAG, "SessionTimeOut:" + sessionTimeOut);
+        SlLog.d(TAG, "SessionTimeOut:" + sessionTimeOut);
         return sessionTimeOut;
     }
 
@@ -394,7 +459,7 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
                 @Override
                 public void handleMessage(Message msg) {
                     if (messageReceiveTime != 0 && SystemClock.elapsedRealtime() - messageReceiveTime < sessionTime) {
-                        SALog.i(TAG, "$AppEnd 事件已触发。");
+                        SlLog.i(TAG, "$AppEnd 事件已触发。");
                         return;
                     }
                     messageReceiveTime = SystemClock.elapsedRealtime();
@@ -416,9 +481,9 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
             };
             // 注册 Session 监听，防止多进程
             mContext.getContentResolver().registerContentObserver(DbParams.getInstance().getSessionTimeUri(),
-                    false, new SensorsActivityStateObserver(handler));
+                    false, new SlActivityStateObserver(handler));
         } catch (Exception ex) {
-            SALog.printStackTrace(ex);
+            SlLog.printStackTrace(ex);
         }
     }
 
@@ -427,16 +492,16 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
      */
     private void resetState() {
         try {
-            mSensorsDataInstance.stopTrackScreenOrientation();
-            mSensorsDataInstance.resetPullSDKConfigTimer();
+            mSlDataInstance.stopTrackScreenOrientation();
+            mSlDataInstance.resetPullSDKConfigTimer();
             HeatMapService.getInstance().stop();
             VisualizedAutoTrackService.getInstance().stop();
-            mSensorsDataInstance.appEnterBackground();
+            mSlDataInstance.appEnterBackground();
             resumeFromBackground = true;
-            mSensorsDataInstance.clearLastScreenUrl();
-//            mSensorsDataInstance.stopTrackTaskThread();
+            mSlDataInstance.clearLastScreenUrl();
+//            mSlDataInstance.stopTrackTaskThread();
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
@@ -449,14 +514,14 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
         }
     }
 
-    private class SensorsActivityStateObserver extends ContentObserver {
+    private class SlActivityStateObserver extends ContentObserver {
 
         /**
          * Creates a content observer.
          *
          * @param handler The handler to run {@link #onChange} on, or null if none.
          */
-        SensorsActivityStateObserver(Handler handler) {
+        SlActivityStateObserver(Handler handler) {
             super(handler);
         }
 
@@ -468,12 +533,12 @@ class SensorsDataActivityLifecycleCallbacks implements Application.ActivityLifec
                     sessionTime = mDbAdapter.getSessionIntervalTime();
                 }
             } catch (Exception e) {
-                SALog.printStackTrace(e);
+                SlLog.printStackTrace(e);
             }
         }
     }
 
     private boolean isAutoTrackAppEnd() {
-        return !mSensorsDataInstance.isAutoTrackEventTypeIgnored(SensorsDataAPI.AutoTrackEventType.APP_END);
+        return !mSlDataInstance.isAutoTrackEventTypeIgnored(SlDataAPI.AutoTrackEventType.APP_END);
     }
 }

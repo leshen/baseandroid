@@ -1,19 +1,3 @@
-/*
- * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sl Data Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package baseandroid.sl.sdk.analytics;
 
 import android.annotation.SuppressLint;
@@ -36,31 +20,6 @@ import android.view.View;
 import android.view.Window;
 import android.webkit.WebView;
 import android.widget.Toast;
-
-
-import baseandroid.sl.sdk.analytics.content.SlConfigOptions;
-import baseandroid.sl.sdk.analytics.data.DbAdapter;
-import baseandroid.sl.sdk.analytics.data.PersistentLoader;
-import baseandroid.sl.sdk.analytics.data.persistent.PersistentDistinctId;
-import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstDay;
-import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstStart;
-import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstTrackInstallation;
-import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstTrackInstallationWithCallback;
-import baseandroid.sl.sdk.analytics.data.persistent.PersistentRemoteSDKConfig;
-import baseandroid.sl.sdk.analytics.data.persistent.PersistentSuperProperties;
-import baseandroid.sl.sdk.analytics.exceptions.InvalidDataException;
-import baseandroid.sl.sdk.analytics.internal.FragmentAPI;
-import baseandroid.sl.sdk.analytics.internal.IFragmentAPI;
-import baseandroid.sl.sdk.analytics.internal.ScreenAutoTracker;
-import baseandroid.sl.sdk.util.AopUtil;
-import baseandroid.sl.sdk.util.AppInfoUtils;
-import baseandroid.sl.sdk.util.ChannelUtils;
-import baseandroid.sl.sdk.util.DeviceUtils;
-import baseandroid.sl.sdk.util.JSONUtils;
-import baseandroid.sl.sdk.util.NetworkUtils;
-import baseandroid.sl.sdk.util.SlDataUtils;
-import baseandroid.sl.sdk.util.SlLog;
-import baseandroid.sl.sdk.util.TimeUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,19 +50,41 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
 import baseandroid.sl.sdk.R;
+import baseandroid.sl.sdk.analytics.data.DbAdapter;
+import baseandroid.sl.sdk.analytics.data.PersistentLoader;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentDistinctId;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstDay;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstStart;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstTrackInstallation;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstTrackInstallationWithCallback;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentRemoteSDKConfig;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentSuperProperties;
+import baseandroid.sl.sdk.analytics.deeplink.SlDataDeepLinkCallback;
+import baseandroid.sl.sdk.analytics.encrypt.SecreteKey;
+import baseandroid.sl.sdk.analytics.encrypt.SlDataEncrypt;
+import baseandroid.sl.sdk.analytics.exceptions.InvalidDataException;
+import baseandroid.sl.sdk.analytics.internal.FragmentAPI;
+import baseandroid.sl.sdk.analytics.internal.IFragmentAPI;
 import baseandroid.sl.sdk.analytics.internal.ISlDataAPI;
+import baseandroid.sl.sdk.analytics.internal.ScreenAutoTracker;
+import baseandroid.sl.sdk.analytics.internal.SlEventListener;
+import baseandroid.sl.sdk.analytics.internal.SlLifeCallEventListener;
+import baseandroid.sl.sdk.analytics.util.AopUtil;
+import baseandroid.sl.sdk.analytics.util.AppInfoUtils;
+import baseandroid.sl.sdk.analytics.util.ChannelUtils;
+import baseandroid.sl.sdk.analytics.util.DeviceUtils;
+import baseandroid.sl.sdk.analytics.util.JSONUtils;
+import baseandroid.sl.sdk.analytics.util.NetworkUtils;
+import baseandroid.sl.sdk.analytics.util.SlDataUtils;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+import baseandroid.sl.sdk.analytics.util.TimeUtils;
 
-import static baseandroid.sl.sdk.util.Base64Coder.CHARSET_UTF8;
-import static baseandroid.sl.sdk.util.SlDataHelper.assertKey;
-import static baseandroid.sl.sdk.util.SlDataHelper.assertPropertyTypes;
-import static baseandroid.sl.sdk.util.SlDataHelper.assertValue;
+import static baseandroid.sl.sdk.analytics.util.Base64Coder.CHARSET_UTF8;
+import static baseandroid.sl.sdk.analytics.util.SlDataHelper.assertKey;
+import static baseandroid.sl.sdk.analytics.util.SlDataHelper.assertPropertyTypes;
+import static baseandroid.sl.sdk.analytics.util.SlDataHelper.assertValue;
 
-
-/**
- * Sl Analytics SDK
- */
 public class SlDataAPI implements ISlDataAPI {
-
     // 可视化埋点功能最低 API 版本
     public static final int VTRACK_SUPPORTED_MIN_API = 16;
     // SDK版本
@@ -113,7 +94,7 @@ public class SlDataAPI implements ISlDataAPI {
 
     // Maps each token to a singleton SlDataAPI instance
     private static final Map<Context, SlDataAPI> sInstanceMap = new HashMap<>();
-    private static final String TAG = "SA.SlDataAPI";
+    private static final String TAG = "Sl.SlDataAPI";
     static boolean mIsMainProcess = false;
     static boolean SHOW_DEBUG_INFO_VIEW = true;
     private static SlDataSDKRemoteConfig mSDKRemoteConfig;
@@ -172,7 +153,11 @@ public class SlDataAPI implements ISlDataAPI {
     private SSLSocketFactory mSSLSocketFactory;
     private SlDataTrackEventCallBack mTrackEventCallBack;
     private List<SlEventListener> mEventListenerList;
+
+    private SlLifeCallEventListener mLifeCallEventListener;
     private IFragmentAPI mFragmentAPI;
+    SlDataEncrypt mSlDataEncrypt;
+    private SlDataDeepLinkCallback mDeepLinkCallback;
 
     //private
     SlDataAPI() {
@@ -188,6 +173,7 @@ public class SlDataAPI implements ISlDataAPI {
         mDeviceInfo = null;
         mTrackTimer = null;
         mMainProcessName = null;
+        mSlDataEncrypt = null;
     }
 
     SlDataAPI(Context context, String serverURL, DebugMode debugMode) {
@@ -210,8 +196,12 @@ public class SlDataAPI implements ISlDataAPI {
         mTrackTaskManagerThread = new TrackTaskManagerThread();
         new Thread(mTrackTaskManagerThread, ThreadNameConstants.THREAD_TASK_QUEUE).start();
         SlDataExceptionHandler.init();
-        initSAConfig(serverURL, packageName);
-        DbAdapter.getInstance(context, packageName);
+        initSlConfig(serverURL, packageName);
+        if (mSlConfigOptions.mEnableEncrypt) {
+            mSlDataEncrypt = new SlDataEncrypt(context, mSlConfigOptions.mPersistentSecretKey);
+        }
+
+        DbAdapter.getInstance(context, packageName, mSlDataEncrypt);
         mMessages = AnalyticsMessages.getInstance(mContext);
         mAndroidId = SlDataUtils.getAndroidID(mContext);
 
@@ -273,10 +263,10 @@ public class SlDataAPI implements ISlDataAPI {
     /**
      * 初始化并获取 SlDataAPI 单例
      *
-     * @param context App 的 Context
+     * @param context   App 的 Context
      * @param serverURL 用于收集事件的服务地址
      * @param debugMode Debug 模式,
-     * {@link SlDataAPI.DebugMode}
+     *                  {@link SlDataAPI.DebugMode}
      * @return SlDataAPI 单例
      */
     @Deprecated
@@ -287,7 +277,7 @@ public class SlDataAPI implements ISlDataAPI {
     /**
      * 初始化并获取 SlDataAPI 单例
      *
-     * @param context App 的 Context
+     * @param context   App 的 Context
      * @param serverURL 用于收集事件的服务地址
      * @return SlDataAPI 单例
      */
@@ -299,34 +289,34 @@ public class SlDataAPI implements ISlDataAPI {
     /**
      * 初始化并获取 SlDataAPI 单例
      *
-     * @param context App 的 Context
+     * @param context         App 的 Context
      * @param saConfigOptions SDK 的配置项
      * @return SlDataAPI 单例
      */
     @Deprecated
     public static SlDataAPI sharedInstance(Context context, SlConfigOptions saConfigOptions) {
         mSlConfigOptions = saConfigOptions;
-        SlDataAPI SlDataAPI = getInstance(context, saConfigOptions.mServerUrl, DebugMode.DEBUG_OFF);
-        if (!SlDataAPI.mSDKConfigInit) {
-            SlDataAPI.applySAConfigOptions();
+        SlDataAPI slDataAPI = getInstance(context, saConfigOptions.mServerUrl, DebugMode.DEBUG_OFF);
+        if (!slDataAPI.mSDKConfigInit) {
+            slDataAPI.applySlConfigOptions();
         }
-        return SlDataAPI;
+        return slDataAPI;
     }
 
     /**
      * 初始化神策 SDK
      *
-     * @param context App 的 Context
+     * @param context         App 的 Context
      * @param saConfigOptions SDK 的配置项
      */
     public static void startWithConfigOptions(Context context, SlConfigOptions saConfigOptions) {
         if (context == null || saConfigOptions == null) {
-            throw new NullPointerException("Context、SAConfigOptions 不可以为 null");
+            throw new NullPointerException("Context、SlConfigOptions 不可以为 null");
         }
         mSlConfigOptions = saConfigOptions;
-        SlDataAPI SlDataAPI = getInstance(context, saConfigOptions.mServerUrl, DebugMode.DEBUG_OFF);
-        if (!SlDataAPI.mSDKConfigInit) {
-            SlDataAPI.applySAConfigOptions();
+        SlDataAPI slDataAPI = getInstance(context, saConfigOptions.mServerUrl, DebugMode.DEBUG_OFF);
+        if (!slDataAPI.mSDKConfigInit) {
+            slDataAPI.applySlConfigOptions();
         }
     }
 
@@ -414,7 +404,7 @@ public class SlDataAPI implements ISlDataAPI {
     /**
      * 更新 SlDataSDKRemoteConfig
      *
-     * @param sdkRemoteConfig SlDataSDKRemoteConfig 在线控制 SDK 的配置
+     * @param sdkRemoteConfig   SlDataSDKRemoteConfig 在线控制 SDK 的配置
      * @param effectImmediately 是否立即生效
      */
     private void setSDKRemoteConfig(SlDataSDKRemoteConfig sdkRemoteConfig, boolean effectImmediately) {
@@ -439,7 +429,23 @@ public class SlDataAPI implements ISlDataAPI {
             return;
         }
 
-        if (mSlConfigOptions != null && !mSlConfigOptions.mDisableRandomTimeRequestRemoteConfig
+        boolean enableConfigV = true;
+        // 如果是开启加密的情况下，则判断密钥是否为空或是否是版本升级
+        if (mSlConfigOptions.mEnableEncrypt) {
+            if (SlDataUtils.checkVersionIsNew(mContext, VERSION)) {
+                enableConfigV = false;
+            } else if (mSlDataEncrypt.isRSlSecretKeyNull()) {
+                enableConfigV = false;
+            }
+        }
+
+        /*
+         * 满足以下条件则触发远程配置请求：
+         * 1. 开启加密，但是密钥为空或升级版本，即 enableConfigV = false；
+         * 2. 禁用分散请求时，即 mDisableRandomTimeRequestRemoteConfig = true；
+         * 3. 分散请求满足条件时；
+         */
+        if (enableConfigV && mSlConfigOptions != null && !mSlConfigOptions.mDisableRandomTimeRequestRemoteConfig
                 && !SlDataUtils.isRequestValid(mContext, mSlConfigOptions.mMinRequestInterval, mSlConfigOptions.mMaxRequestInterval)) {
             return;
         }
@@ -453,6 +459,7 @@ public class SlDataAPI implements ISlDataAPI {
             mPullSDKConfigCountDownTimer = null;
         }
 
+        final boolean finalEnableConfigV = enableConfigV;
         mPullSDKConfigCountDownTimer = new CountDownTimer(120 * 1000, 30 * 1000) {
             @Override
             public void onTick(long l) {
@@ -481,7 +488,7 @@ public class SlDataAPI implements ISlDataAPI {
                                 return;
                             }
 
-                            if (!TextUtils.isEmpty(configUrl)) {
+                            if (!TextUtils.isEmpty(configUrl) && finalEnableConfigV) {
                                 String configVersion = null;
                                 if (mSDKRemoteConfig != null) {
                                     configVersion = mSDKRemoteConfig.getV();
@@ -494,9 +501,9 @@ public class SlDataAPI implements ISlDataAPI {
                                         configUrl = configUrl + "?v=" + configVersion;
                                     }
                                 }
-                                SlLog.d(TAG, "Android remote config url:" + configUrl);
                             }
 
+                            SlLog.i(TAG, "Android remote config url:" + configUrl);
                             url = new URL(configUrl);
                             urlConnection = (HttpURLConnection) url.openConnection();
                             if (urlConnection == null) {
@@ -527,6 +534,14 @@ public class SlDataAPI implements ISlDataAPI {
                                 data = result.toString();
                                 if (!TextUtils.isEmpty(data)) {
                                     SlDataSDKRemoteConfig sdkRemoteConfig = SlDataUtils.toSDKRemoteConfig(data);
+                                    try {
+                                        if (mSlConfigOptions.mEnableEncrypt) {
+                                            mSlDataEncrypt.saveSecretKey(new SecreteKey(sdkRemoteConfig.getRsaPublicKey(), sdkRemoteConfig.getPkv()));
+                                        }
+                                    } catch (Exception e) {
+                                        SlLog.printStackTrace(e);
+                                    }
+
                                     setSDKRemoteConfig(sdkRemoteConfig, false);
                                 }
                             }
@@ -574,11 +589,6 @@ public class SlDataAPI implements ISlDataAPI {
     void applySDKConfigFromCache() {
         try {
             SlDataSDKRemoteConfig sdkRemoteConfig = SlDataUtils.toSDKRemoteConfig(mPersistentRemoteSDKConfig.get());
-
-            if (sdkRemoteConfig == null) {
-                sdkRemoteConfig = new SlDataSDKRemoteConfig();
-            }
-
             //关闭 debug 模式
             if (sdkRemoteConfig.isDisableDebugMode()) {
                 setDebugMode(DebugMode.DEBUG_OFF);
@@ -688,7 +698,9 @@ public class SlDataAPI implements ISlDataAPI {
     public int getSessionIntervalTime() {
         if (DbAdapter.getInstance() == null) {
             SlLog.i(TAG, "The static method sharedInstance(context, serverURL, debugMode) should be called before calling sharedInstance()");
-            return 30 * 1000;
+            //shenle 改为10秒
+            return 10 * 1000;
+//            return 30 * 1000;
         }
 
         return DbAdapter.getInstance().getSessionIntervalTime();
@@ -1322,7 +1334,10 @@ public class SlDataAPI implements ISlDataAPI {
         if (view == null || properties == null) {
             return;
         }
-
+        JSONObject propertiesOld = (JSONObject) view.getTag(R.id.sl_analytics_tag_view_properties);
+        if (propertiesOld != null) {
+            AopUtil.mergeJSONObject(propertiesOld, properties);
+        }
         view.setTag(R.id.sl_analytics_tag_view_properties, properties);
     }
 
@@ -1695,12 +1710,24 @@ public class SlDataAPI implements ISlDataAPI {
                             }
 
                             if (!ChannelUtils.hasUtmProperties(_properties)) {
-                                String installSource = ChannelUtils.getDeviceInfo(mContext,
-                                        mAndroidId, mSlConfigOptions.isSDKInitOAID);
+                                String installSource;
+                                if (_properties.has("$oaid")) {
+                                    String oaid = _properties.optString("$oaid");
+                                    installSource = ChannelUtils.getDeviceInfo(mContext,
+                                            mAndroidId, mSlConfigOptions.isSDKInitOAID, oaid);
+                                    SlLog.i(TAG, "properties has oaid " + oaid);
+                                } else {
+                                    installSource = ChannelUtils.getDeviceInfo(mContext,
+                                            mAndroidId, mSlConfigOptions.isSDKInitOAID);
+                                }
+
                                 if (_properties.has("$gaid")) {
                                     installSource = String.format("%s##gaid=%s", installSource, _properties.optString("$gaid"));
                                 }
                                 _properties.put("$ios_install_source", installSource);
+                            }
+                            if (_properties.has("$oaid")) {
+                                _properties.remove("$oaid");
                             }
 
                             if (_properties.has("$gaid")) {
@@ -1720,7 +1747,7 @@ public class SlDataAPI implements ISlDataAPI {
                         // 再发送 profile_set_once 或者 profile_set
                         JSONObject profileProperties = new JSONObject();
                         SlDataUtils.mergeJSONObject(_properties, profileProperties);
-                        profileProperties.put("$first_visit_time", new Date());
+                        profileProperties.put("$first_visit_time", new java.util.Date());
                         if (mSlConfigOptions.mEnableMultipleChannelMatch) {
                             trackEvent(EventType.PROFILE_SET, null, profileProperties, null);
                         } else {
@@ -1778,8 +1805,18 @@ public class SlDataAPI implements ISlDataAPI {
                             ChannelUtils.mergeUtmByMetaData(mContext, _properties);
                         }
                         if (!ChannelUtils.hasUtmProperties(_properties)) {
-                            _properties.put("$channel_device_info",
-                                    ChannelUtils.getDeviceInfo(mContext, mAndroidId, mSlConfigOptions.isSDKInitOAID));
+                            if (_properties.has("$oaid")) {
+                                String oaid = _properties.optString("$oaid");
+                                _properties.put("$channel_device_info",
+                                        ChannelUtils.getDeviceInfo(mContext, mAndroidId, mSlConfigOptions.isSDKInitOAID, oaid));
+                                SlLog.i(TAG, "properties has oaid " + oaid);
+                            } else {
+                                _properties.put("$channel_device_info",
+                                        ChannelUtils.getDeviceInfo(mContext, mAndroidId, mSlConfigOptions.isSDKInitOAID));
+                            }
+                        }
+                        if (_properties.has("$oaid")) {
+                            _properties.remove("$oaid");
                         }
                     } catch (Exception e) {
                         SlLog.printStackTrace(e);
@@ -1815,9 +1852,28 @@ public class SlDataAPI implements ISlDataAPI {
     }
 
     /**
+     * shenle add click中间
+     *
+     * @param eventName  事件名称
+     * @param properties 事件属性
+     */
+    void trackClick(final String eventName, final JSONObject properties) {
+        mTrackTaskManager.addTrackEventTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    trackEvent(EventType.TRACK, eventName, properties, null);
+                } catch (Exception e) {
+                    SlLog.printStackTrace(e);
+                }
+            }
+        });
+    }
+
+    /**
      * SDK 内部用来调用触发事件
      *
-     * @param eventName 事件名称
+     * @param eventName  事件名称
      * @param properties 事件属性
      */
     void trackInternal(final String eventName, final JSONObject properties) {
@@ -1878,7 +1934,7 @@ public class SlDataAPI implements ISlDataAPI {
     @Override
     public String trackTimerStart(String eventName) {
         try {
-            final String eventNameRegex = String.format("%s_%s_%s", eventName, UUID.randomUUID().toString().replace("-", "_"), "SATimer");
+            final String eventNameRegex = String.format("%s_%s_%s", eventName, UUID.randomUUID().toString().replace("-", "_"), "SlTimer");
             trackTimerBegin(eventNameRegex, TimeUnit.SECONDS);
             trackTimerBegin(eventName, TimeUnit.SECONDS);
             return eventNameRegex;
@@ -1892,7 +1948,7 @@ public class SlDataAPI implements ISlDataAPI {
      * 触发事件的暂停/恢复
      *
      * @param eventName 事件名称
-     * @param isPause 设置是否暂停
+     * @param isPause   设置是否暂停
      */
     private void trackTimerState(final String eventName, final boolean isPause) {
         final long startTime = SystemClock.elapsedRealtime();
@@ -1944,18 +2000,18 @@ public class SlDataAPI implements ISlDataAPI {
 
     @Override
     public void trackTimerEnd(final String eventName, final JSONObject properties) {
-        long endTime = SystemClock.elapsedRealtime();
-        if (eventName != null) {
-            synchronized (mTrackTimer) {
-                EventTimer eventTimer = mTrackTimer.get(eventName);
-                if (eventTimer != null) {
-                    eventTimer.setEndTime(endTime);
-                }
-            }
-        }
+        final long endTime = SystemClock.elapsedRealtime();
         mTrackTaskManager.addTrackEventTask(new Runnable() {
             @Override
             public void run() {
+                if (eventName != null) {
+                    synchronized (mTrackTimer) {
+                        EventTimer eventTimer = mTrackTimer.get(eventName);
+                        if (eventTimer != null) {
+                            eventTimer.setEndTime(endTime);
+                        }
+                    }
+                }
                 try {
                     JSONObject _properties = ChannelUtils.checkOrSetChannelCallbackEvent(getConfigOptions().isAutoAddChannelCallbackEvent, eventName, properties, mContext);
                     trackEvent(EventType.TRACK, eventName, _properties, null);
@@ -2110,9 +2166,9 @@ public class SlDataAPI implements ISlDataAPI {
                     String title = null;
 
                     if (fragment.getClass().isAnnotationPresent(SlDataFragmentTitle.class)) {
-                        SlDataFragmentTitle SlDataFragmentTitle = fragment.getClass().getAnnotation(SlDataFragmentTitle.class);
-                        if (SlDataFragmentTitle != null) {
-                            title = SlDataFragmentTitle.title();
+                        SlDataFragmentTitle slDataFragmentTitle = fragment.getClass().getAnnotation(SlDataFragmentTitle.class);
+                        if (slDataFragmentTitle != null) {
+                            title = slDataFragmentTitle.title();
                         }
                     }
 
@@ -2247,6 +2303,11 @@ public class SlDataAPI implements ISlDataAPI {
     @Override
     public void setTrackEventCallBack(SlDataTrackEventCallBack trackEventCallBack) {
         mTrackEventCallBack = trackEventCallBack;
+    }
+
+    @Override
+    public void setDeepLinkCallback(SlDataDeepLinkCallback deepLinkCallback) {
+        mDeepLinkCallback = deepLinkCallback;
     }
 
     @Override
@@ -2786,7 +2847,7 @@ public class SlDataAPI implements ISlDataAPI {
     }
 
     /**
-     * @param eventName 事件名
+     * @param eventName       事件名
      * @param eventProperties 事件属性
      * @return 该事件是否入库
      */
@@ -2855,7 +2916,7 @@ public class SlDataAPI implements ISlDataAPI {
                     mTrackTimer.remove(eventName);
                 }
 
-                if (eventName.endsWith("_SATimer") && eventName.length() > 45) {// Timer 计时交叉计算拼接的字符串长度 45
+                if (eventName.endsWith("_SlTimer") && eventName.length() > 45) {// Timer 计时交叉计算拼接的字符串长度 45
                     eventName = eventName.substring(0, eventName.length() - 45);
                 }
             }
@@ -3120,7 +3181,7 @@ public class SlDataAPI implements ISlDataAPI {
             SlLog.printStackTrace(e);
         }
     }
-    
+
     boolean isMultiProcess() {
         return mSlConfigOptions.mEnableMultiProcess;
     }
@@ -3199,7 +3260,7 @@ public class SlDataAPI implements ISlDataAPI {
         }
     }
 
-    private void initSAConfig(String serverURL, String packageName) {
+    private void initSlConfig(String serverURL, String packageName) {
         Bundle configBundle = null;
         try {
             final ApplicationInfo appInfo = mContext.getApplicationContext().getPackageManager()
@@ -3223,7 +3284,7 @@ public class SlDataAPI implements ISlDataAPI {
         if (mSlConfigOptions.mInvokeLog) {
             enableLog(mSlConfigOptions.mLogEnabled);
         } else {
-            enableLog(configBundle.getBoolean("com.Sldata.analytics.android.EnableLogging",
+            enableLog(configBundle.getBoolean("com.sldata.analytics.android.EnableLogging",
                     this.mDebugMode != DebugMode.DEBUG_OFF));
         }
 
@@ -3234,12 +3295,12 @@ public class SlDataAPI implements ISlDataAPI {
         }
 
         if (mSlConfigOptions.mFlushInterval == 0) {
-            mSlConfigOptions.setFlushInterval(configBundle.getInt("com.Sldata.analytics.android.FlushInterval",
+            mSlConfigOptions.setFlushInterval(configBundle.getInt("com.sldata.analytics.android.FlushInterval",
                     15000));
         }
 
         if (mSlConfigOptions.mFlushBulkSize == 0) {
-            mSlConfigOptions.setFlushBulkSize(configBundle.getInt("com.Sldata.analytics.android.FlushBulkSize",
+            mSlConfigOptions.setFlushBulkSize(configBundle.getInt("com.sldata.analytics.android.FlushBulkSize",
                     100));
         }
 
@@ -3247,7 +3308,7 @@ public class SlDataAPI implements ISlDataAPI {
             mSlConfigOptions.setMaxCacheSize(32 * 1024 * 1024L);
         }
 
-        this.mAutoTrack = configBundle.getBoolean("com.Sldata.analytics.android.AutoTrack",
+        this.mAutoTrack = configBundle.getBoolean("com.sldata.analytics.android.AutoTrack",
                 false);
         if (mSlConfigOptions.mAutoTrackEventType != 0) {
             enableAutoTrack(mSlConfigOptions.mAutoTrackEventType);
@@ -3255,22 +3316,22 @@ public class SlDataAPI implements ISlDataAPI {
         }
 
         if (!mSlConfigOptions.mInvokeHeatMapEnabled) {
-            mSlConfigOptions.mHeatMapEnabled = configBundle.getBoolean("com.Sldata.analytics.android.HeatMap",
+            mSlConfigOptions.mHeatMapEnabled = configBundle.getBoolean("com.sldata.analytics.android.HeatMap",
                     false);
         }
 
         if (!mSlConfigOptions.mInvokeHeatMapConfirmDialog) {
-            mSlConfigOptions.mHeatMapConfirmDialogEnabled = configBundle.getBoolean("com.Sldata.analytics.android.EnableHeatMapConfirmDialog",
+            mSlConfigOptions.mHeatMapConfirmDialogEnabled = configBundle.getBoolean("com.sldata.analytics.android.EnableHeatMapConfirmDialog",
                     true);
         }
 
         if (!mSlConfigOptions.mInvokeVisualizedEnabled) {
-            mSlConfigOptions.mVisualizedEnabled = configBundle.getBoolean("com.Sldata.analytics.android.VisualizedAutoTrack",
+            mSlConfigOptions.mVisualizedEnabled = configBundle.getBoolean("com.sldata.analytics.android.VisualizedAutoTrack",
                     false);
         }
 
         if (!mSlConfigOptions.mInvokeVisualizedConfirmDialog) {
-            mSlConfigOptions.mVisualizedConfirmDialogEnabled = configBundle.getBoolean("com.Sldata.analytics.android.EnableVisualizedAutoTrackConfirmDialog",
+            mSlConfigOptions.mVisualizedConfirmDialogEnabled = configBundle.getBoolean("com.sldata.analytics.android.EnableVisualizedAutoTrackConfirmDialog",
                     true);
         }
 
@@ -3280,28 +3341,28 @@ public class SlDataAPI implements ISlDataAPI {
             identify(mSlConfigOptions.mAnonymousId);
         }
 
-        SHOW_DEBUG_INFO_VIEW = configBundle.getBoolean("com.Sldata.analytics.android.ShowDebugInfoView",
+        SHOW_DEBUG_INFO_VIEW = configBundle.getBoolean("com.sldata.analytics.android.ShowDebugInfoView",
                 true);
 
-        this.mDisableDefaultRemoteConfig = configBundle.getBoolean("com.Sldata.analytics.android.DisableDefaultRemoteConfig",
-                false);
+        this.mDisableDefaultRemoteConfig = configBundle.getBoolean("com.sldata.analytics.android.DisableDefaultRemoteConfig",
+                true);
 
         this.mMainProcessName = AppInfoUtils.getMainProcessName(mContext);
         if (TextUtils.isEmpty(this.mMainProcessName)) {
-            this.mMainProcessName = configBundle.getString("com.Sldata.analytics.android.MainProcessName");
+            this.mMainProcessName = configBundle.getString("com.sldata.analytics.android.MainProcessName");
         }
         mIsMainProcess = AppInfoUtils.isMainProcess(mContext, mMainProcessName);
 
-        this.mDisableTrackDeviceId = configBundle.getBoolean("com.Sldata.analytics.android.DisableTrackDeviceId",
+        this.mDisableTrackDeviceId = configBundle.getBoolean("com.sldata.analytics.android.DisableTrackDeviceId",
                 false);
         if (isSaveDeepLinkInfo()) {
             ChannelUtils.loadUtmByLocal(mContext);
         } else {
-            ChannelUtils.clearLocalDeepLinkInfo(mContext);
+            ChannelUtils.clearLocalUtm(mContext);
         }
     }
 
-    private void applySAConfigOptions() {
+    private void applySlConfigOptions() {
         if (mSlConfigOptions.mEnableTrackAppCrash) {
             SlDataExceptionHandler.enableAppCrash();
         }
@@ -3410,6 +3471,19 @@ public class SlDataAPI implements ISlDataAPI {
         }
     }
 
+    /**
+     * 生命周期
+     *
+     * @return
+     */
+    public void setSlLifeCallEventListener(SlLifeCallEventListener eventListener) {
+        this.mLifeCallEventListener = eventListener;
+    }
+
+    public SlLifeCallEventListener getLifeCallEventListener() {
+        return mLifeCallEventListener;
+    }
+
     SlConfigOptions getConfigOptions() {
         return mSlConfigOptions;
     }
@@ -3422,11 +3496,15 @@ public class SlDataAPI implements ISlDataAPI {
         return mSlConfigOptions.mEnableSaveDeepLinkInfo;
     }
 
+    SlDataDeepLinkCallback getDeepLinkCallback() {
+        return mDeepLinkCallback;
+    }
+
     /**
      * Debug 模式，用于检验数据导入是否正确。该模式下，事件会逐条实时发送到 Sl Analytics，并根据返回值检查
      * 数据导入是否正确。
      * Debug 模式的具体使用方式，请参考:
-     * http://www.Sldata.cn/manual/debug_mode.html
+     * http://www.sldata.cn/manual/debug_mode.html
      * Debug 模式有三种：
      * DEBUG_OFF - 关闭DEBUG模式
      * DEBUG_ONLY - 打开DEBUG模式，但该模式下发送的数据仅用于调试，不进行数据导入

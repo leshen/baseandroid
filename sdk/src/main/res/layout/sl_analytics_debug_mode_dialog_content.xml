@@ -13,14 +13,14 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/sensors_analytics_debug_mode_title"
+            android:id="@+id/sl_analytics_debug_mode_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#000000"
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/sensors_analytics_debug_mode_message"
+            android:id="@+id/sl_analytics_debug_mode_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
@@ -35,7 +35,7 @@
         android:background="#dddddd" />
 
     <TextView
-        android:id="@+id/sensors_analytics_debug_mode_track"
+        android:id="@+id/sl_analytics_debug_mode_track"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -49,7 +49,7 @@
         android:background="#dddddd" />
 
     <TextView
-        android:id="@+id/sensors_analytics_debug_mode_only"
+        android:id="@+id/sl_analytics_debug_mode_only"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -63,7 +63,7 @@
         android:background="#dddddd" />
 
     <TextView
-        android:id="@+id/sensors_analytics_debug_mode_cancel"
+        android:id="@+id/sl_analytics_debug_mode_cancel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"

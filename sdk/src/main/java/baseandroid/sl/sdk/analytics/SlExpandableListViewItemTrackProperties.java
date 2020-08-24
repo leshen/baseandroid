@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2016/11/30.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public interface SensorsExpandableListViewItemTrackProperties {
+public interface SlExpandableListViewItemTrackProperties {
     /**
      * 点击 groupPosition、childPosition 处 item 的扩展属性
      *
@@ -29,7 +29,7 @@ public interface SensorsExpandableListViewItemTrackProperties {
      * @return JSONObject
      * @throws JSONException JSONException
      */
-    JSONObject getSensorsChildItemTrackProperties(int groupPosition, int childPosition) throws JSONException;
+    JSONObject getSlChildItemTrackProperties(int groupPosition, int childPosition) throws JSONException;
 
     /**
      * 点击 groupPosition 处 item 的扩展属性
@@ -38,5 +38,5 @@ public interface SensorsExpandableListViewItemTrackProperties {
      * @return JSONObject
      * @throws JSONException JSONException
      */
-    JSONObject getSensorsGroupItemTrackProperties(int groupPosition) throws JSONException;
+    JSONObject getSlGroupItemTrackProperties(int groupPosition) throws JSONException;
 }

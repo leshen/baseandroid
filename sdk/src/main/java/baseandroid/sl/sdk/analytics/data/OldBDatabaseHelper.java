@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.data;
+package baseandroid.sl.sdk.analytics.data;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -24,6 +24,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 
 public class OldBDatabaseHelper extends SQLiteOpenHelper {
@@ -54,7 +56,7 @@ public class OldBDatabaseHelper extends SQLiteOpenHelper {
                 arr.put(jsonObject);
             }
         } catch (Exception e) {
-            com.sensorsdata.analytics.android.sdk.SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         } finally {
             close();
             if (c != null) {

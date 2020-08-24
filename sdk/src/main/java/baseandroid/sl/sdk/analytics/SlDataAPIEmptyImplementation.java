@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.sensorsdata.analytics.android.sdk;
+package baseandroid.sl.sdk.analytics;
 
 
 import android.annotation.SuppressLint;
@@ -32,8 +32,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSocketFactory;
 
-public class SensorsDataAPIEmptyImplementation extends SensorsDataAPI {
-    SensorsDataAPIEmptyImplementation() {
+import baseandroid.sl.sdk.analytics.deeplink.SlDataDeepLinkCallback;
+
+public class SlDataAPIEmptyImplementation extends SlDataAPI {
+    SlDataAPIEmptyImplementation() {
 
     }
 
@@ -127,7 +129,9 @@ public class SensorsDataAPIEmptyImplementation extends SensorsDataAPI {
 
     @Override
     public int getSessionIntervalTime() {
-        return 30 * 1000;
+        //shenle 改为10秒
+        return 10 * 1000;
+//        return 30 * 1000;
     }
 
     @Override
@@ -151,7 +155,7 @@ public class SensorsDataAPIEmptyImplementation extends SensorsDataAPI {
     }
 
     @Override
-    public void disableAutoTrack(SensorsDataAPI.AutoTrackEventType autoTrackEventType) {
+    public void disableAutoTrack(SlDataAPI.AutoTrackEventType autoTrackEventType) {
 
     }
 
@@ -259,7 +263,7 @@ public class SensorsDataAPIEmptyImplementation extends SensorsDataAPI {
 
     @Deprecated
     @Override
-    public void ignoreAutoTrackEventType(SensorsDataAPI.AutoTrackEventType autoTrackEventType) {
+    public void ignoreAutoTrackEventType(SlDataAPI.AutoTrackEventType autoTrackEventType) {
 
     }
 
@@ -270,7 +274,7 @@ public class SensorsDataAPIEmptyImplementation extends SensorsDataAPI {
     }
 
     @Override
-    public boolean isAutoTrackEventTypeIgnored(SensorsDataAPI.AutoTrackEventType eventType) {
+    public boolean isAutoTrackEventTypeIgnored(SlDataAPI.AutoTrackEventType eventType) {
         return true;
     }
 
@@ -558,12 +562,17 @@ public class SensorsDataAPIEmptyImplementation extends SensorsDataAPI {
     }
 
     @Override
-    public void registerDynamicSuperProperties(SensorsDataDynamicSuperProperties dynamicSuperProperties) {
+    public void registerDynamicSuperProperties(SlDataDynamicSuperProperties dynamicSuperProperties) {
 
     }
 
     @Override
-    public void setTrackEventCallBack(SensorsDataTrackEventCallBack trackEventCallBack) {
+    public void setTrackEventCallBack(SlDataTrackEventCallBack trackEventCallBack) {
+
+    }
+
+    @Override
+    public void setDeepLinkCallback(SlDataDeepLinkCallback deepLinkCallback) {
 
     }
 

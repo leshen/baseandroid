@@ -1,19 +1,3 @@
-/*
- * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sl Data Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package baseandroid.sl.sdk.analytics.internal;
 
 import android.annotation.SuppressLint;
@@ -34,6 +18,8 @@ import javax.net.ssl.SSLSocketFactory;
 import baseandroid.sl.sdk.analytics.SlDataAPI;
 import baseandroid.sl.sdk.analytics.SlDataDynamicSuperProperties;
 import baseandroid.sl.sdk.analytics.SlDataTrackEventCallBack;
+import baseandroid.sl.sdk.analytics.deeplink.SlDataDeepLinkCallback;
+import baseandroid.sl.sdk.analytics.util.SlDataUtils;
 
 public interface ISlDataAPI extends IFragmentAPI {
     /**
@@ -165,7 +151,7 @@ public interface ISlDataAPI extends IFragmentAPI {
      * 打开 SDK 自动追踪
      * 该功能自动追踪 App 的一些行为，例如 SDK 初始化、App 启动（$AppStart） / 关闭（$AppEnd）、
      * 进入页面（$AppViewScreen）等等，具体信息请参考文档:
-     * https://Sldata.cn/manual/android_sdk.html
+     * https://sensorsdata.cn/manual/android_sdk.html
      * 该功能仅在 API 14 及以上版本中生效，默认关闭
      */
     @Deprecated
@@ -174,7 +160,7 @@ public interface ISlDataAPI extends IFragmentAPI {
     /**
      * 打开 SDK 自动追踪
      * 该功能自动追踪 App 的一些行为，指定哪些 AutoTrack 事件被追踪，具体信息请参考文档:
-     * https://Sldata.cn/manual/android_sdk.html
+     * https://sensorsdata.cn/manual/android_sdk.html
      * 该功能仅在 API 14 及以上版本中生效，默认关闭
      *
      * @param eventTypeList 开启 AutoTrack 的事件列表
@@ -541,7 +527,7 @@ public interface ISlDataAPI extends IFragmentAPI {
 
     /**
      * 获取当前用户的匿名 ID
-     * 若调用前未调用 {@link #identify(String)} 设置用户的匿名 ID，SDK 会优先调用 {@link baseandroid.sl.sdk.util.SlDataUtils#getAndroidID(Context)}获取 Android ID，
+     * 若调用前未调用 {@link #identify(String)} 设置用户的匿名 ID，SDK 会优先调用 {@link SlDataUtils#getAndroidID(Context)}获取 Android ID，
      * 如获取的 Android ID 非法，则调用 {@link java.util.UUID} 随机生成 UUID，作为用户的匿名 ID
      *
      * @return 当前用户的匿名 ID
@@ -594,7 +580,7 @@ public interface ISlDataAPI extends IFragmentAPI {
     /**
      * 记录第一次登录行为
      * 这个接口是一个较为复杂的功能，请在使用前先阅读相关说明:
-     * http://www.Sldata.cn/manual/track_signup.html
+     * http://www.sensorsdata.cn/manual/track_signup.html
      * 并在必要时联系我们的技术支持人员。
      * 该方法已不推荐使用，可以具体参考 {@link #login(String)} 方法
      *
@@ -607,7 +593,7 @@ public interface ISlDataAPI extends IFragmentAPI {
     /**
      * 与 {@link #trackSignUp(String, JSONObject)} 类似，无事件属性
      * 这个接口是一个较为复杂的功能，请在使用前先阅读相关说明:
-     * http://www.Sldata.cn/manual/track_signup.html，
+     * http://www.sensorsdata.cn/manual/track_signup.html，
      * 并在必要时联系我们的技术支持人员。
      * 该方法已不推荐使用，可以具体参考 {@link #login(String)} 方法
      *
@@ -618,7 +604,7 @@ public interface ISlDataAPI extends IFragmentAPI {
 
     /**
      * 用于在 App 首次启动时追踪渠道来源，并设置追踪渠道事件的属性。
-     * 这是 Sl Analytics 进阶功能，请参考文档 https://Sldata.cn/manual/track_installation.html
+     * 这是 Sl Analytics 进阶功能，请参考文档 https://sensorsdata.cn/manual/track_installation.html
      *
      * @param eventName 渠道追踪事件的名称
      * @param properties 渠道追踪事件的属性
@@ -628,7 +614,7 @@ public interface ISlDataAPI extends IFragmentAPI {
 
     /**
      * 用于在 App 首次启动时追踪渠道来源，并设置追踪渠道事件的属性。
-     * 这是 Sl Analytics 进阶功能，请参考文档 https://Sldata.cn/manual/track_installation.html
+     * 这是 Sl Analytics 进阶功能，请参考文档 https://sensorsdata.cn/manual/track_installation.html
      *
      * @param eventName 渠道追踪事件的名称
      * @param properties 渠道追踪事件的属性
@@ -637,7 +623,7 @@ public interface ISlDataAPI extends IFragmentAPI {
 
     /**
      * 用于在 App 首次启动时追踪渠道来源，并设置追踪渠道事件的属性。
-     * 这是 Sl Analytics 进阶功能，请参考文档 https://Sldata.cn/manual/track_installation.html
+     * 这是 Sl Analytics 进阶功能，请参考文档 https://sensorsdata.cn/manual/track_installation.html
      *
      * @param eventName 渠道追踪事件的名称
      */
@@ -828,6 +814,13 @@ public interface ISlDataAPI extends IFragmentAPI {
      * @param trackEventCallBack track 事件回调接口
      */
     void setTrackEventCallBack(SlDataTrackEventCallBack trackEventCallBack);
+
+    /**
+     * 设置 DeepLink 接口回调
+     *
+     * @param deepLinkCallback DeepLink 接口回调
+     */
+    void setDeepLinkCallback(SlDataDeepLinkCallback deepLinkCallback);
 
     /**
      * 获取事件公共属性

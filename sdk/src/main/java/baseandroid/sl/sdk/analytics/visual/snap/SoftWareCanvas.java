@@ -1,6 +1,6 @@
 /*
  * Created by zhangxiangwei on 2019/12/27.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual.snap;
+package baseandroid.sl.sdk.analytics.visual.snap;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -28,15 +28,16 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build.VERSION;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
-import com.sensorsdata.analytics.android.sdk.util.WeakSet;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 
+import baseandroid.sl.sdk.analytics.util.SlLog;
+import baseandroid.sl.sdk.analytics.util.WeakSet;
+
 public class SoftWareCanvas extends Canvas {
-    private static final String TAG = "SA.SoftWareCanvas";
+    private static final String TAG = "Sl.SoftWareCanvas";
     private WeakSet<Bitmap> bitmapWeakSet = new WeakSet();
     private Bitmap mBitmap;
 
@@ -81,7 +82,7 @@ public class SoftWareCanvas extends Canvas {
                     return saPaint;
                 }
             } catch (Exception e) {
-                SALog.i(TAG, e.toString());
+                SlLog.i(TAG, e.toString());
             }
         }
         return paint;

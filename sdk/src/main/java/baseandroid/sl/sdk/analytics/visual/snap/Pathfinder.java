@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2015/08/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual.snap;
+package baseandroid.sl.sdk.analytics.visual.snap;
 
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.sensorsdata.analytics.android.sdk.SALog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+
+import baseandroid.sl.sdk.analytics.util.SlLog;
 
 /**
  * Paths in the view hierarchy, and the machinery for finding views using them.
@@ -33,7 +34,7 @@ import java.util.List;
  */
 public class Pathfinder {
 
-    private static final String TAG = "SA.PathFinder";
+    private static final String TAG = "Sl.PathFinder";
     private final IntStack mIndexStack;
 
     public Pathfinder() {
@@ -63,7 +64,7 @@ public class Pathfinder {
         }
 
         if (mIndexStack.full()) {
-            SALog.i(TAG, "Path is too deep, there is no memory to perfrom the finding");
+            SlLog.i(TAG, "Path is too deep, there is no memory to perfrom the finding");
             return;
         }
 
@@ -88,7 +89,7 @@ public class Pathfinder {
         }
 
         if (mIndexStack.full()) {
-            SALog.i(TAG, "Path is too deep, there is no memory to perfrom the finding");
+            SlLog.i(TAG, "Path is too deep, there is no memory to perfrom the finding");
             return;
         }
 

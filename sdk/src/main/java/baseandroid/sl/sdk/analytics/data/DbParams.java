@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2019/02/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.data;
+package baseandroid.sl.sdk.analytics.data;
 
 import android.net.Uri;
 
@@ -27,7 +27,7 @@ public class DbParams {
     public static final String KEY_CHANNEL_EVENT_NAME = "event_name";
     public static final String KEY_CHANNEL_RESULT = "result";
     /* 数据库名称 */
-    static final String DATABASE_NAME = "sensorsdata";
+    static final String DATABASE_NAME = "sldata";
     /* 数据库版本号 */
     static final int DATABASE_VERSION = 5;
     static final String TABLE_ACTIVITY_START_COUNT = "activity_started_count";
@@ -41,19 +41,24 @@ public class DbParams {
     static final String KEY_CREATED_AT = "created_at";
     /* 数据库状态 */
     static final int DB_UPDATE_ERROR = -1;
+    static final String VALUE = "value";
+    public static final String GZIP_DATA_EVENT = "1";
+    public static final String GZIP_DATA_ENCRYPT = "9";
+    /* 删除所有数据 */
+    static final String DB_DELETE_ALL = "DB_DELETE_ALL";
     private static DbParams instance;
     private final Uri mUri, mActivityStartCountUri, mAppStartTimeUri, mAppEndUri,
             mAppEndDataUri, mSessionTimeUri, mLoginIdUri, mChannelPersistentUri;
 
     private DbParams(String packageName) {
-        mUri = Uri.parse("content://" + packageName + ".SensorsDataContentProvider/" + TABLE_EVENTS);
-        mActivityStartCountUri = Uri.parse("content://" + packageName + ".SensorsDataContentProvider/" + TABLE_ACTIVITY_START_COUNT);
-        mAppStartTimeUri = Uri.parse("content://" + packageName + ".SensorsDataContentProvider/" + TABLE_APP_START_TIME);
-        mAppEndDataUri = Uri.parse("content://" + packageName + ".SensorsDataContentProvider/" + TABLE_APP_END_DATA);
-        mAppEndUri = Uri.parse("content://" + packageName + ".SensorsDataContentProvider/" + TABLE_APP_END_TIME);
-        mSessionTimeUri = Uri.parse("content://" + packageName + ".SensorsDataContentProvider/" + TABLE_SESSION_INTERVAL_TIME);
-        mLoginIdUri = Uri.parse("content://" + packageName + ".SensorsDataContentProvider/" + TABLE_LOGIN_ID);
-        mChannelPersistentUri = Uri.parse("content://" + packageName + ".SensorsDataContentProvider/" + TABLE_CHANNEL_PERSISTENT);
+        mUri = Uri.parse("content://" + packageName + ".SlDataContentProvider/" + TABLE_EVENTS);
+        mActivityStartCountUri = Uri.parse("content://" + packageName + ".SlDataContentProvider/" + TABLE_ACTIVITY_START_COUNT);
+        mAppStartTimeUri = Uri.parse("content://" + packageName + ".SlDataContentProvider/" + TABLE_APP_START_TIME);
+        mAppEndDataUri = Uri.parse("content://" + packageName + ".SlDataContentProvider/" + TABLE_APP_END_DATA);
+        mAppEndUri = Uri.parse("content://" + packageName + ".SlDataContentProvider/" + TABLE_APP_END_TIME);
+        mSessionTimeUri = Uri.parse("content://" + packageName + ".SlDataContentProvider/" + TABLE_SESSION_INTERVAL_TIME);
+        mLoginIdUri = Uri.parse("content://" + packageName + ".SlDataContentProvider/" + TABLE_LOGIN_ID);
+        mChannelPersistentUri = Uri.parse("content://" + packageName + ".SlDataContentProvider/" + TABLE_CHANNEL_PERSISTENT);
     }
 
     public static DbParams getInstance(String packageName) {
@@ -142,3 +147,4 @@ public class DbParams {
         return mChannelPersistentUri;
     }
 }
+

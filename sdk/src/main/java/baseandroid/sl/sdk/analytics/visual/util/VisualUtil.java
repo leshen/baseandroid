@@ -1,6 +1,6 @@
 /*
  * Created by zhangxiangwei on 2020/03/05.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.visual.util;
+package baseandroid.sl.sdk.analytics.visual.util;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
@@ -31,14 +32,16 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.sensorsdata.analytics.android.sdk.AopConstants;
-import com.sensorsdata.analytics.android.sdk.SALog;
-import com.sensorsdata.analytics.android.sdk.util.AopUtil;
-import com.sensorsdata.analytics.android.sdk.util.ReflectUtil;
-import com.sensorsdata.analytics.android.sdk.util.ViewUtil;
-import com.sensorsdata.analytics.android.sdk.visual.snap.Pathfinder;
-
 import org.json.JSONObject;
+
+import baseandroid.sl.sdk.analytics.AopConstants;
+import baseandroid.sl.sdk.analytics.AppStateManager;
+import baseandroid.sl.sdk.analytics.visual.model.SnapInfo;
+import baseandroid.sl.sdk.analytics.visual.snap.Pathfinder;
+import baseandroid.sl.sdk.analytics.util.AopUtil;
+import baseandroid.sl.sdk.analytics.util.ReflectUtil;
+import baseandroid.sl.sdk.analytics.util.SlLog;
+import baseandroid.sl.sdk.analytics.util.ViewUtil;
 
 public class VisualUtil {
     public static int getVisibility(View view) {
@@ -105,9 +108,38 @@ public class VisualUtil {
             }
             return -1;
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
             return -1;
         }
+    }
+
+    /**
+     * 取控件响应链的 screen_name
+     *
+     * @param view ViewTree 中的 控件
+     * @param info 可视化临时缓存对象
+     * @return 含 $screen_name 和 $title 的 json
+     */
+    public static JSONObject getScreenNameAndTitle(View view, SnapInfo info) {
+        if (view == null) {
+            return null;
+        }
+        JSONObject object = null;
+        Activity activity = AppStateManager.getInstance().getForegroundActivity();
+        if (activity != null) {
+            object = new JSONObject();
+            Object fragment = AopUtil.getFragmentFromView(view);
+            if (fragment != null) {
+                AopUtil.getScreenNameAndTitleFromFragment(object, fragment, activity);
+                if (!info.hasFragment) {
+                    info.hasFragment = true;
+                }
+            } else {
+                object = AopUtil.buildTitleAndScreenName(activity);
+                mergeRnScreenNameAndTitle(object);
+            }
+        }
+        return object;
     }
 
     /**
@@ -117,7 +149,7 @@ public class VisualUtil {
      */
     public static void mergeRnScreenNameAndTitle(JSONObject jsonObject) {
         try {
-            Class<?> rnViewUtils = ReflectUtil.getCurrentClass(new String[]{"com.sensorsdata.analytics.utils.RNViewUtils"});
+            Class<?> rnViewUtils = ReflectUtil.getCurrentClass(new String[]{"baseandroid.sl.sdk.analytics.util.RNViewUtils"});
             String properties = ReflectUtil.callStaticMethod(rnViewUtils, "getVisualizeProperties");
             if (!TextUtils.isEmpty(properties)) {
                 JSONObject object = new JSONObject(properties);
@@ -131,9 +163,9 @@ public class VisualUtil {
                 }
             }
         } catch (Exception e) {
-            SALog.printStackTrace(e);
+            SlLog.printStackTrace(e);
         }
     }
 
-
 }
+

@@ -1,6 +1,6 @@
 /*
  * Created by wangzhuozhou on 2019/02/01.
- * Copyright 2015－2020 Sensors Data Inc.
+ * Copyright 2015－2020 Sl Data Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 
-package com.sensorsdata.analytics.android.sdk.data;
+package baseandroid.sl.sdk.analytics.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentAppEndData;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentAppPaused;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentAppStartTime;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentDistinctId;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentFirstDay;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentFirstStart;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentFirstTrackInstallation;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentFirstTrackInstallationWithCallback;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentIdentity;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentLoginId;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentRemoteSDKConfig;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentSessionIntervalTime;
-import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentSuperProperties;
-
 import java.util.concurrent.Future;
+
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentAppEndData;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentAppPaused;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentAppStartTime;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentDistinctId;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstDay;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstStart;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstTrackInstallation;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentFirstTrackInstallationWithCallback;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentIdentity;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentLoginId;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentRemoteSDKConfig;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentSessionIntervalTime;
+import baseandroid.sl.sdk.analytics.data.persistent.PersistentSuperProperties;
 
 public class PersistentLoader {
 
@@ -46,7 +46,7 @@ public class PersistentLoader {
     private PersistentLoader(Context context) {
         PersistentLoader.context = context.getApplicationContext();
         final SharedPreferencesLoader sPrefsLoader = new SharedPreferencesLoader();
-        final String prefsName = "com.sensorsdata.analytics.android.sdk.SensorsDataAPI";
+        final String prefsName = "baseandroid.sl.sdk.analytics.SlDataAPI";
         storedPreferences = sPrefsLoader.loadPreferences(context, prefsName);
     }
 
@@ -105,7 +105,7 @@ public class PersistentLoader {
         String FIRST_INSTALL = "first_track_installation";
         String FIRST_INSTALL_CALLBACK = "first_track_installation_with_callback";
         String LOGIN_ID = "events_login_id";
-        String REMOTE_CONFIG = "sensorsdata_sdk_configuration";
+        String REMOTE_CONFIG = "sldata_sdk_configuration";
         String SUPER_PROPERTIES = "super_properties";
     }
 }
